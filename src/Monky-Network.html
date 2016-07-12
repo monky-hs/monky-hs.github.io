@@ -8,7 +8,7 @@
 </head>
 <body>
 <pre><a name="line-1"></a><span class='hs-comment'>{-
-<a name="line-2"></a>    Copyright 2015 Markus Ongyerth, Stephan Guenther
+<a name="line-2"></a>    Copyright 2015,2016 Markus Ongyerth, Stephan Guenther
 <a name="line-3"></a>
 <a name="line-4"></a>    This file is part of Monky.
 <a name="line-5"></a>
@@ -36,91 +36,42 @@
 <a name="line-27"></a>If multiple network interfaces are active the first one in the list will be
 <a name="line-28"></a>used.
 <a name="line-29"></a>-}</span>
-<a name="line-30"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Network</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetworkHandles</span><span class='hs-layout'>,</span> <span class='hs-varid'>getReadWriteMulti</span><span class='hs-layout'>,</span> <span class='hs-varid'>getNetworkHandles</span><span class='hs-layout'>)</span>
-<a name="line-31"></a><span class='hs-keyword'>where</span>
-<a name="line-32"></a>
-<a name="line-33"></a>
-<a name="line-34"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span><span class='hs-varop'>.</span><span class='hs-conid'>Clock</span><span class='hs-varop'>.</span><span class='hs-conid'>POSIX</span>
-<a name="line-35"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Utility</span>
-<a name="line-36"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>IORef</span>
+<a name="line-30"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Network</span>
+<a name="line-31"></a>  <span class='hs-layout'>(</span> <span class='hs-conid'>NetworkHandles</span>
+<a name="line-32"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getReadWriteMulti</span>
+<a name="line-33"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getNetworkHandles</span>
+<a name="line-34"></a>  <span class='hs-layout'>)</span>
+<a name="line-35"></a><span class='hs-keyword'>where</span>
+<a name="line-36"></a>
 <a name="line-37"></a>
-<a name="line-38"></a><a name="NetworkHandle"></a><span class='hs-comment'>-- |Internal handle represanting exactly one interface</span>
-<a name="line-39"></a><a name="NetworkHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>NetworkHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>NetH</span> <span class='hs-conid'>File</span> <span class='hs-conid'>File</span> <span class='hs-conid'>File</span> <span class='hs-layout'>(</span><span class='hs-conid'>IORef</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>IORef</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>IORef</span> <span class='hs-conid'>POSIXTime</span><span class='hs-layout'>)</span>
+<a name="line-38"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Network</span><span class='hs-varop'>.</span><span class='hs-conid'>Static</span>
+<a name="line-39"></a>
 <a name="line-40"></a><a name="NetworkHandles"></a><span class='hs-comment'>-- |The handle exported by this module</span>
 <a name="line-41"></a><a name="NetworkHandles"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>NetworkHandles</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>NetHs</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>NetworkHandle</span><span class='hs-keyglyph'>]</span>
 <a name="line-42"></a>
-<a name="line-43"></a><a name="basePath"></a><span class='hs-definition'>basePath</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>
-<a name="line-44"></a><span class='hs-definition'>basePath</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"/sys/class/net/"</span>
-<a name="line-45"></a>
-<a name="line-46"></a><a name="readPath"></a><span class='hs-definition'>readPath</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>
-<a name="line-47"></a><span class='hs-definition'>readPath</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"/statistics/rx_bytes"</span>
-<a name="line-48"></a>
-<a name="line-49"></a><a name="writePath"></a><span class='hs-definition'>writePath</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>
-<a name="line-50"></a><span class='hs-definition'>writePath</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"/statistics/tx_bytes"</span>
-<a name="line-51"></a>
-<a name="line-52"></a><a name="statePath"></a><span class='hs-definition'>statePath</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>
-<a name="line-53"></a><span class='hs-definition'>statePath</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"/operstate"</span>
-<a name="line-54"></a>
-<a name="line-55"></a><a name="getReadWriteReal"></a><span class='hs-definition'>getReadWriteReal</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetworkHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span>
-<a name="line-56"></a><span class='hs-definition'>getReadWriteReal</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetH</span> <span class='hs-varid'>readf</span> <span class='hs-varid'>writef</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>readref</span> <span class='hs-varid'>writeref</span> <span class='hs-varid'>timeref</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-57"></a>  <span class='hs-varid'>nread</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readValue</span> <span class='hs-varid'>readf</span>
-<a name="line-58"></a>  <span class='hs-varid'>nwrite</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readValue</span> <span class='hs-varid'>writef</span>
-<a name="line-59"></a>  <span class='hs-varid'>time</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getPOSIXTime</span>
-<a name="line-60"></a>  <span class='hs-varid'>oread</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readIORef</span> <span class='hs-varid'>readref</span>
-<a name="line-61"></a>  <span class='hs-varid'>owrite</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readIORef</span> <span class='hs-varid'>writeref</span>
-<a name="line-62"></a>  <span class='hs-varid'>otime</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readIORef</span> <span class='hs-varid'>timeref</span>
-<a name="line-63"></a>  <span class='hs-keyword'>let</span> <span class='hs-varid'>cread</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>oread</span> <span class='hs-comment'>-</span> <span class='hs-varid'>nread</span>
-<a name="line-64"></a>  <span class='hs-keyword'>let</span> <span class='hs-varid'>cwrite</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>owrite</span> <span class='hs-comment'>-</span> <span class='hs-varid'>nwrite</span>
-<a name="line-65"></a>  <span class='hs-keyword'>let</span> <span class='hs-varid'>ctime</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>otime</span> <span class='hs-comment'>-</span> <span class='hs-varid'>time</span>
-<a name="line-66"></a>  <span class='hs-varid'>writeIORef</span> <span class='hs-varid'>readref</span> <span class='hs-varid'>nread</span>
-<a name="line-67"></a>  <span class='hs-varid'>writeIORef</span> <span class='hs-varid'>writeref</span> <span class='hs-varid'>nwrite</span>
-<a name="line-68"></a>  <span class='hs-varid'>writeIORef</span> <span class='hs-varid'>timeref</span> <span class='hs-varid'>time</span>
-<a name="line-69"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>cread</span> <span class='hs-varop'>*</span> <span class='hs-num'>8</span><span class='hs-layout'>)</span> <span class='hs-varop'>`sdivBound`</span> <span class='hs-varid'>round</span> <span class='hs-varid'>ctime</span><span class='hs-layout'>,</span>
-<a name="line-70"></a>    <span class='hs-layout'>(</span><span class='hs-varid'>cwrite</span> <span class='hs-varop'>*</span> <span class='hs-num'>8</span><span class='hs-layout'>)</span> <span class='hs-varop'>`sdivBound`</span> <span class='hs-varid'>round</span> <span class='hs-varid'>ctime</span><span class='hs-layout'>)</span>
-<a name="line-71"></a>
-<a name="line-72"></a><a name="getReadWrite"></a><span class='hs-definition'>getReadWrite</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetworkHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-73"></a><span class='hs-definition'>getReadWrite</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetH</span> <span class='hs-varid'>readf</span> <span class='hs-varid'>writef</span> <span class='hs-varid'>statef</span> <span class='hs-varid'>readref</span> <span class='hs-varid'>writeref</span> <span class='hs-varid'>timeref</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-74"></a>  <span class='hs-varid'>state</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readLine</span> <span class='hs-varid'>statef</span>
-<a name="line-75"></a>  <span class='hs-keyword'>if</span> <span class='hs-varid'>state</span> <span class='hs-varop'>==</span> <span class='hs-str'>"down"</span>
-<a name="line-76"></a>    <span class='hs-keyword'>then</span> <span class='hs-varid'>return</span> <span class='hs-conid'>Nothing</span>
-<a name="line-77"></a>    <span class='hs-keyword'>else</span> <span class='hs-keyword'>do</span>
-<a name="line-78"></a>      <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getReadWriteReal</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetH</span> <span class='hs-varid'>readf</span> <span class='hs-varid'>writef</span> <span class='hs-varid'>statef</span> <span class='hs-varid'>readref</span> <span class='hs-varid'>writeref</span> <span class='hs-varid'>timeref</span><span class='hs-layout'>)</span>
-<a name="line-79"></a>      <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>Just</span> <span class='hs-varid'>val</span>
-<a name="line-80"></a>
-<a name="line-81"></a><a name="getMultiReadWriteInt"></a><span class='hs-definition'>getMultiReadWriteInt</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>NetworkHandle</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-82"></a><span class='hs-definition'>getMultiReadWriteInt</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>Nothing</span>
-<a name="line-83"></a><span class='hs-definition'>getMultiReadWriteInt</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-conop'>:</span><span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-84"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getReadWrite</span> <span class='hs-varid'>x</span>
-<a name="line-85"></a>  <span class='hs-keyword'>case</span> <span class='hs-varid'>val</span> <span class='hs-keyword'>of</span>
-<a name="line-86"></a>    <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>getMultiReadWriteInt</span> <span class='hs-varid'>xs</span>
-<a name="line-87"></a>    <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varid'>val</span>
-<a name="line-88"></a>
-<a name="line-89"></a><a name="getReadWriteMulti"></a><span class='hs-comment'>{- |Get the read/write rate of the first interface in the list that is connected
-<a name="line-90"></a>
-<a name="line-91"></a>The value will be a tuple (Read, Write) in bit/s or 'Nothing' if no network is
-<a name="line-92"></a>connected.
-<a name="line-93"></a>-}</span>
-<a name="line-94"></a><span class='hs-definition'>getReadWriteMulti</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetworkHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-95"></a><span class='hs-definition'>getReadWriteMulti</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHs</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getMultiReadWriteInt</span> <span class='hs-varid'>xs</span>
-<a name="line-96"></a>
-<a name="line-97"></a><a name="getNetworkHandle"></a><span class='hs-definition'>getNetworkHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>NetworkHandle</span>
-<a name="line-98"></a><span class='hs-definition'>getNetworkHandle</span> <span class='hs-varid'>dev</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-99"></a>  <span class='hs-varid'>readf</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>fopen</span> <span class='hs-varop'>$</span><span class='hs-varid'>path</span> <span class='hs-varop'>++</span> <span class='hs-varid'>readPath</span>
-<a name="line-100"></a>  <span class='hs-varid'>writef</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>fopen</span> <span class='hs-varop'>$</span><span class='hs-varid'>path</span> <span class='hs-varop'>++</span> <span class='hs-varid'>writePath</span>
-<a name="line-101"></a>  <span class='hs-varid'>statef</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>fopen</span> <span class='hs-varop'>$</span><span class='hs-varid'>path</span> <span class='hs-varop'>++</span> <span class='hs-varid'>statePath</span>
-<a name="line-102"></a>  <span class='hs-varid'>readref</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>newIORef</span> <span class='hs-layout'>(</span><span class='hs-num'>1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span>
-<a name="line-103"></a>  <span class='hs-varid'>writeref</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>newIORef</span> <span class='hs-layout'>(</span><span class='hs-num'>1</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span>
-<a name="line-104"></a>  <span class='hs-varid'>timeref</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>newIORef</span> <span class='hs-layout'>(</span><span class='hs-num'>0</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>POSIXTime</span><span class='hs-layout'>)</span>
-<a name="line-105"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>NetH</span> <span class='hs-varid'>readf</span> <span class='hs-varid'>writef</span> <span class='hs-varid'>statef</span> <span class='hs-varid'>readref</span> <span class='hs-varid'>writeref</span> <span class='hs-varid'>timeref</span>
-<a name="line-106"></a>  <span class='hs-keyword'>where</span> <span class='hs-varid'>path</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>basePath</span> <span class='hs-varop'>++</span> <span class='hs-varid'>dev</span>
-<a name="line-107"></a>
-<a name="line-108"></a><a name="getNetworkHandles"></a><span class='hs-comment'>-- |Create a 'NetworkHandles' for the list of networks</span>
-<a name="line-109"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>String</span><span class='hs-keyglyph'>]</span>  <span class='hs-comment'>-- ^A list of interface names, the display order will be the same as the order in this list</span>
-<a name="line-110"></a>                  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>NetworkHandles</span>
-<a name="line-111"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>NetHs</span> <span class='hs-conid'>[]</span>
-<a name="line-112"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-conop'>:</span><span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-113"></a>  <span class='hs-varid'>handle</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandle</span> <span class='hs-varid'>x</span>
-<a name="line-114"></a>  <span class='hs-layout'>(</span><span class='hs-conid'>NetHs</span> <span class='hs-varid'>ns</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandles</span> <span class='hs-varid'>xs</span>
-<a name="line-115"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHs</span> <span class='hs-layout'>(</span><span class='hs-varid'>handle</span><span class='hs-conop'>:</span><span class='hs-varid'>ns</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-43"></a><a name="getMultiReadWriteInt"></a><span class='hs-definition'>getMultiReadWriteInt</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>NetworkHandle</span><span class='hs-keyglyph'>]</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-44"></a><span class='hs-definition'>getMultiReadWriteInt</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>Nothing</span>
+<a name="line-45"></a><span class='hs-definition'>getMultiReadWriteInt</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-conop'>:</span><span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-46"></a>  <span class='hs-varid'>val</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getReadWrite</span> <span class='hs-varid'>x</span>
+<a name="line-47"></a>  <span class='hs-keyword'>case</span> <span class='hs-varid'>val</span> <span class='hs-keyword'>of</span>
+<a name="line-48"></a>    <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>getMultiReadWriteInt</span> <span class='hs-varid'>xs</span>
+<a name="line-49"></a>    <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varid'>val</span>
+<a name="line-50"></a>
+<a name="line-51"></a><a name="getReadWriteMulti"></a><span class='hs-comment'>{- |Get the read/write rate of the first interface in the list that is connected
+<a name="line-52"></a>
+<a name="line-53"></a>The value will be a tuple (Read, Write) in bit/s or 'Nothing' if no network is
+<a name="line-54"></a>connected.
+<a name="line-55"></a>-}</span>
+<a name="line-56"></a><span class='hs-definition'>getReadWriteMulti</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetworkHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-57"></a><span class='hs-definition'>getReadWriteMulti</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHs</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getMultiReadWriteInt</span> <span class='hs-varid'>xs</span>
+<a name="line-58"></a>
+<a name="line-59"></a><a name="getNetworkHandles"></a><span class='hs-comment'>-- |Create a 'NetworkHandles' for the list of networks</span>
+<a name="line-60"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-keyglyph'>::</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>String</span><span class='hs-keyglyph'>]</span>  <span class='hs-comment'>-- ^A list of interface names, the display order will be the same as the order in this list</span>
+<a name="line-61"></a>                  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>NetworkHandles</span>
+<a name="line-62"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>NetHs</span> <span class='hs-conid'>[]</span>
+<a name="line-63"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-conop'>:</span><span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-64"></a>  <span class='hs-varid'>handle</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandle</span> <span class='hs-varid'>x</span>
+<a name="line-65"></a>  <span class='hs-layout'>(</span><span class='hs-conid'>NetHs</span> <span class='hs-varid'>ns</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandles</span> <span class='hs-varid'>xs</span>
+<a name="line-66"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHs</span> <span class='hs-layout'>(</span><span class='hs-varid'>handle</span><span class='hs-conop'>:</span><span class='hs-varid'>ns</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
 </pre></body>
 </html>
