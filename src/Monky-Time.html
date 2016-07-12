@@ -35,41 +35,47 @@
 <a name="line-26"></a>-}</span>
 <a name="line-27"></a>
 <a name="line-28"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span>
-<a name="line-29"></a><span class='hs-layout'>(</span><span class='hs-conid'>TimeHandle</span><span class='hs-layout'>,</span> <span class='hs-varid'>getTime</span><span class='hs-layout'>,</span> <span class='hs-varid'>getHM</span><span class='hs-layout'>,</span> <span class='hs-varid'>getTimeHandle</span><span class='hs-layout'>)</span>
-<a name="line-30"></a><span class='hs-keyword'>where</span>
-<a name="line-31"></a>
-<a name="line-32"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span><span class='hs-varop'>.</span><span class='hs-conid'>Clock</span>
-<a name="line-33"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span><span class='hs-varop'>.</span><span class='hs-conid'>Format</span>
-<a name="line-34"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span><span class='hs-varop'>.</span><span class='hs-conid'>LocalTime</span>
+<a name="line-29"></a>  <span class='hs-layout'>(</span> <span class='hs-conid'>TimeHandle</span>
+<a name="line-30"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTime</span>
+<a name="line-31"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getHM</span>
+<a name="line-32"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTimeHandle</span>
+<a name="line-33"></a>  <span class='hs-layout'>)</span>
+<a name="line-34"></a><span class='hs-keyword'>where</span>
 <a name="line-35"></a>
-<a name="line-36"></a><span class='hs-comment'>-- 4.8 breaks with System.Locale import</span>
-<a name="line-37"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
-<a name="line-38"></a><span class='hs-cpp'>#else</span>
-<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Locale</span>
-<a name="line-40"></a><span class='hs-cpp'>#endif</span>
-<a name="line-41"></a>
-<a name="line-42"></a><a name="TimeHandle"></a><span class='hs-comment'>-- |The handle exported by this module.</span>
-<a name="line-43"></a><a name="TimeHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>TimeHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>TimeH</span> <span class='hs-conid'>String</span>
-<a name="line-44"></a>
+<a name="line-36"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span><span class='hs-varop'>.</span><span class='hs-conid'>Clock</span>
+<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span><span class='hs-varop'>.</span><span class='hs-conid'>Format</span>
+<a name="line-38"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Time</span><span class='hs-varop'>.</span><span class='hs-conid'>LocalTime</span>
+<a name="line-39"></a>
+<a name="line-40"></a><span class='hs-comment'>-- 4.8 breaks with System.Locale import</span>
+<a name="line-41"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
+<a name="line-42"></a><span class='hs-cpp'>#else</span>
+<a name="line-43"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Locale</span>
+<a name="line-44"></a><span class='hs-cpp'>#endif</span>
 <a name="line-45"></a>
-<a name="line-46"></a><a name="getTime"></a><span class='hs-comment'>-- |Get the current time in the format given to the handle.</span>
-<a name="line-47"></a><span class='hs-definition'>getTime</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>TimeHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>String</span>
-<a name="line-48"></a><span class='hs-definition'>getTime</span> <span class='hs-layout'>(</span><span class='hs-conid'>TimeH</span> <span class='hs-varid'>str</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-49"></a>  <span class='hs-varid'>t</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentTime</span>
-<a name="line-50"></a>  <span class='hs-varid'>z</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentTimeZone</span>
-<a name="line-51"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-varid'>formatTime</span> <span class='hs-varid'>defaultTimeLocale</span> <span class='hs-varid'>str</span> <span class='hs-varop'>$</span><span class='hs-varid'>utcToLocalTime</span> <span class='hs-varid'>z</span> <span class='hs-varid'>t</span>
-<a name="line-52"></a>
-<a name="line-53"></a><a name="getHM"></a><span class='hs-comment'>-- |Get the current time (HH:MM) format for the current time zone.</span>
-<a name="line-54"></a><span class='hs-definition'>getHM</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>TimeHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span>
-<a name="line-55"></a><span class='hs-definition'>getHM</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-56"></a>  <span class='hs-varid'>t</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentTime</span>
-<a name="line-57"></a>  <span class='hs-varid'>z</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentTimeZone</span>
-<a name="line-58"></a>  <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-conid'>LocalTime</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>TimeOfDay</span> <span class='hs-varid'>h</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>utcToLocalTime</span> <span class='hs-varid'>z</span> <span class='hs-varid'>t</span>
-<a name="line-59"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>h</span><span class='hs-layout'>,</span> <span class='hs-varid'>m</span><span class='hs-layout'>)</span>
-<a name="line-60"></a>
-<a name="line-61"></a><a name="getTimeHandle"></a><span class='hs-comment'>-- |Get a handle for this module</span>
-<a name="line-62"></a><span class='hs-definition'>getTimeHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>  <span class='hs-comment'>-- ^The format that should be used for 'getTime' in strftime format</span>
-<a name="line-63"></a>              <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>TimeHandle</span>
-<a name="line-64"></a><span class='hs-definition'>getTimeHandle</span> <span class='hs-varid'>format</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-conid'>TimeH</span> <span class='hs-varid'>format</span><span class='hs-layout'>)</span>
+<a name="line-46"></a><a name="TimeHandle"></a><span class='hs-comment'>-- |The handle exported by this module.</span>
+<a name="line-47"></a><a name="TimeHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>TimeHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>TimeH</span> <span class='hs-conid'>String</span> <span class='hs-conid'>TimeZone</span>
+<a name="line-48"></a>
+<a name="line-49"></a><a name="doTime"></a><span class='hs-definition'>doTime</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>TimeZone</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>UTCTime</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span>
+<a name="line-50"></a><span class='hs-definition'>doTime</span> <span class='hs-varid'>str</span> <span class='hs-varid'>z</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>formatTime</span> <span class='hs-varid'>defaultTimeLocale</span> <span class='hs-varid'>str</span> <span class='hs-varop'>$</span> <span class='hs-varid'>utcToLocalTime</span> <span class='hs-varid'>z</span> <span class='hs-varid'>t</span>
+<a name="line-51"></a>
+<a name="line-52"></a><a name="getTime"></a><span class='hs-comment'>-- |Get the current time in the format given to the handle.</span>
+<a name="line-53"></a><span class='hs-definition'>getTime</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>TimeHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>String</span>
+<a name="line-54"></a><span class='hs-definition'>getTime</span> <span class='hs-layout'>(</span><span class='hs-conid'>TimeH</span> <span class='hs-varid'>str</span> <span class='hs-varid'>z</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-55"></a>  <span class='hs-varid'>t</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentTime</span>
+<a name="line-56"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-varid'>doTime</span> <span class='hs-varid'>str</span> <span class='hs-varid'>z</span> <span class='hs-varid'>t</span>
+<a name="line-57"></a>
+<a name="line-58"></a><a name="getHM"></a><span class='hs-comment'>-- |Get the current time (HH:MM) format for the current time zone.</span>
+<a name="line-59"></a><span class='hs-definition'>getHM</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>TimeHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span>
+<a name="line-60"></a><span class='hs-definition'>getHM</span> <span class='hs-layout'>(</span><span class='hs-conid'>TimeH</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>z</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-61"></a>  <span class='hs-varid'>t</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentTime</span>
+<a name="line-62"></a>  <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-conid'>LocalTime</span> <span class='hs-keyword'>_</span> <span class='hs-layout'>(</span><span class='hs-conid'>TimeOfDay</span> <span class='hs-varid'>h</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>utcToLocalTime</span> <span class='hs-varid'>z</span> <span class='hs-varid'>t</span>
+<a name="line-63"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>h</span><span class='hs-layout'>,</span> <span class='hs-varid'>m</span><span class='hs-layout'>)</span>
+<a name="line-64"></a>
+<a name="line-65"></a><a name="getTimeHandle"></a><span class='hs-comment'>-- |Get a handle for this module</span>
+<a name="line-66"></a><span class='hs-definition'>getTimeHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>  <span class='hs-comment'>-- ^The format that should be used for 'getTime' in strftime format</span>
+<a name="line-67"></a>              <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>TimeHandle</span>
+<a name="line-68"></a><span class='hs-definition'>getTimeHandle</span> <span class='hs-varid'>format</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-69"></a>  <span class='hs-varid'>z</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentTimeZone</span>
+<a name="line-70"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-conid'>TimeH</span> <span class='hs-varid'>format</span> <span class='hs-varid'>z</span><span class='hs-layout'>)</span>
 </pre></body>
 </html>

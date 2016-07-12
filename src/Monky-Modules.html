@@ -26,47 +26,80 @@
 <a name="line-17"></a>    along with Monky.  If not, see &lt;<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.
 <a name="line-18"></a>-}</span>
 <a name="line-19"></a><span class='hs-comment'>{-# LANGUAGE ExistentialQuantification #-}</span>
-<a name="line-20"></a><span class='hs-comment'>{-|
-<a name="line-21"></a>Module      : Monky.Modules
-<a name="line-22"></a>Description : The module definition used by 'startLoop'
-<a name="line-23"></a>Maintainer  : ongy, moepi
-<a name="line-24"></a>Stability   : experimental
-<a name="line-25"></a>Portability : Linux
-<a name="line-26"></a>
-<a name="line-27"></a>This module provides the 'Module' class which is used to define a 'Monky'
-<a name="line-28"></a>compatible module.
-<a name="line-29"></a>-}</span>
-<a name="line-30"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
-<a name="line-31"></a><span class='hs-layout'>(</span><span class='hs-conid'>Modules</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>Module</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>pack</span><span class='hs-layout'>)</span>
-<a name="line-32"></a><span class='hs-keyword'>where</span>
-<a name="line-33"></a>
-<a name="line-34"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Posix</span><span class='hs-varop'>.</span><span class='hs-conid'>Types</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fd</span><span class='hs-layout'>)</span>
-<a name="line-35"></a>
-<a name="line-36"></a><a name="Modules"></a><span class='hs-comment'>-- |A wrapper around module instances so they can be put into a list.</span>
-<a name="line-37"></a><a name="Modules"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Modules</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varop'>.</span> <span class='hs-conid'>Module</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>MW</span> <span class='hs-varid'>a</span> <span class='hs-conid'>Int</span>
-<a name="line-38"></a><a name="Module"></a><span class='hs-comment'>-- |The type class for modules</span>
-<a name="line-39"></a><a name="Module"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Module</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
-<a name="line-40"></a>    <span class='hs-varid'>getText</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The current user</span>
-<a name="line-41"></a>            <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The handle to this module</span>
-<a name="line-42"></a>            <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The text segment that should be displayed for this module</span>
-<a name="line-43"></a>    <span class='hs-varid'>getFDs</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The handle to this module</span>
-<a name="line-44"></a>           <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>Fd</span><span class='hs-keyglyph'>]</span> <span class='hs-comment'>-- ^The 'Fd's to listen on for events</span>
-<a name="line-45"></a>    <span class='hs-varid'>getFDs</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>[]</span>
-<a name="line-46"></a>    <span class='hs-comment'>{- |This function is used instead of 'getText' for event triggerd updates.
-<a name="line-47"></a>
-<a name="line-48"></a>      The default implementation mappes this to 'getText'
-<a name="line-49"></a>    -}</span>
-<a name="line-50"></a>    <span class='hs-varid'>getEventText</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Fd</span> <span class='hs-comment'>-- ^The fd that triggered an event</span>
-<a name="line-51"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The current user</span>
-<a name="line-52"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The handle to this module</span>
-<a name="line-53"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The text segment that should be displayed</span>
-<a name="line-54"></a>    <span class='hs-varid'>getEventText</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getText</span>
-<a name="line-55"></a>
-<a name="line-56"></a><a name="pack"></a><span class='hs-comment'>-- |Function to make packaging modules easier</span>
-<a name="line-57"></a><span class='hs-definition'>pack</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Module</span> <span class='hs-varid'>a</span>
-<a name="line-58"></a>     <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-comment'>-- ^The refresh rate for this module</span>
-<a name="line-59"></a>     <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The function to get a module (get??Handle)</span>
-<a name="line-60"></a>     <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Modules</span> <span class='hs-comment'>-- ^The packed module ready to be given to 'startLoop'</span>
-<a name="line-61"></a><span class='hs-definition'>pack</span> <span class='hs-varid'>i</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-layout'>(</span><span class='hs-varid'>flip</span> <span class='hs-conid'>MW</span> <span class='hs-varid'>i</span><span class='hs-layout'>)</span>
+<a name="line-20"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
+<a name="line-21"></a><span class='hs-comment'>{-|
+<a name="line-22"></a>Module      : Monky.Modules
+<a name="line-23"></a>Description : The module definition used by 'startLoop'
+<a name="line-24"></a>Maintainer  : ongy, moepi
+<a name="line-25"></a>Stability   : experimental
+<a name="line-26"></a>Portability : Linux
+<a name="line-27"></a>
+<a name="line-28"></a>This module provides the 'Module' class which is used to define a 'Monky'
+<a name="line-29"></a>compatible module.
+<a name="line-30"></a>-}</span>
+<a name="line-31"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
+<a name="line-32"></a><span class='hs-layout'>(</span><span class='hs-conid'>Modules</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>Module</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>pack</span><span class='hs-layout'>)</span>
+<a name="line-33"></a><span class='hs-keyword'>where</span>
+<a name="line-34"></a>
+<a name="line-35"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
+<a name="line-36"></a><span class='hs-cpp'>#else</span>
+<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Applicative</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;$&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-38"></a><span class='hs-cpp'>#endif</span>
+<a name="line-39"></a>
+<a name="line-40"></a>
+<a name="line-41"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Posix</span><span class='hs-varop'>.</span><span class='hs-conid'>Types</span> <span class='hs-layout'>(</span><span class='hs-conid'>Fd</span><span class='hs-layout'>)</span>
+<a name="line-42"></a>
+<a name="line-43"></a><a name="Modules"></a><span class='hs-comment'>-- |A wrapper around module instances so they can be put into a list.</span>
+<a name="line-44"></a><a name="Modules"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>Modules</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varop'>.</span> <span class='hs-conid'>Module</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>MW</span> <span class='hs-varid'>a</span> <span class='hs-conid'>Int</span>
+<a name="line-45"></a><a name="Module"></a><span class='hs-comment'>-- |The type class for modules</span>
+<a name="line-46"></a><a name="Module"></a><span class='hs-keyword'>class</span> <span class='hs-conid'>Module</span> <span class='hs-varid'>a</span> <span class='hs-keyword'>where</span>
+<a name="line-47"></a>    <span class='hs-varid'>getText</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The current user</span>
+<a name="line-48"></a>            <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The handle to this module</span>
+<a name="line-49"></a>            <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The text segment that should be displayed for this module</span>
+<a name="line-50"></a>    <span class='hs-varid'>getFDs</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The handle to this module</span>
+<a name="line-51"></a>           <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>Fd</span><span class='hs-keyglyph'>]</span> <span class='hs-comment'>-- ^The 'Fd's to listen on for events</span>
+<a name="line-52"></a>    <span class='hs-varid'>getFDs</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>[]</span>
+<a name="line-53"></a>    <span class='hs-comment'>{- |This function is used instead of 'getText' for event triggerd updates.
+<a name="line-54"></a>
+<a name="line-55"></a>      The default implementation mappes this to 'getText'
+<a name="line-56"></a>    -}</span>
+<a name="line-57"></a>    <span class='hs-varid'>getEventText</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Fd</span> <span class='hs-comment'>-- ^The fd that triggered an event</span>
+<a name="line-58"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The current user</span>
+<a name="line-59"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The handle to this module</span>
+<a name="line-60"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The text segment that should be displayed</span>
+<a name="line-61"></a>    <span class='hs-varid'>getEventText</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getText</span>
+<a name="line-62"></a>
+<a name="line-63"></a>    <span class='hs-comment'>{- |This is supposed to set up the module
+<a name="line-64"></a>       This is only needed, if the module may fail
+<a name="line-65"></a>       so doing nothing should be ok for all *normal* modules
+<a name="line-66"></a>
+<a name="line-67"></a>       The module should return 'True' if the setup was successful (is usable)
+<a name="line-68"></a>       or 'False' if it failed to enter the broken state right at startup
+<a name="line-69"></a>
+<a name="line-70"></a>       Do to the current inner working of monky, recoverModule will be called before setupModule can be called, which will make this unnecessary for most modules
+<a name="line-71"></a>    -}</span>
+<a name="line-72"></a>    <span class='hs-varid'>setupModule</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Bool</span>
+<a name="line-73"></a>    <span class='hs-varid'>setupModule</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>True</span>
+<a name="line-74"></a>
+<a name="line-75"></a>    <span class='hs-comment'>{- |This function is a wrapper around 'getText' that allows
+<a name="line-76"></a>        modules to report a fail and go into a failed state -}</span>
+<a name="line-77"></a>    <span class='hs-varid'>getTextFailable</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-conid'>String</span><span class='hs-layout'>)</span>
+<a name="line-78"></a>    <span class='hs-varid'>getTextFailable</span> <span class='hs-varid'>u</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getText</span> <span class='hs-varid'>u</span> <span class='hs-varid'>h</span>
+<a name="line-79"></a>    <span class='hs-comment'>{- |This function is a wrapper around 'getEventText' that allows
+<a name="line-80"></a>        modules to report a fail and go into a failed state -}</span>
+<a name="line-81"></a>    <span class='hs-varid'>getEventTextFailable</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Fd</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-conid'>String</span><span class='hs-layout'>)</span>
+<a name="line-82"></a>    <span class='hs-varid'>getEventTextFailable</span> <span class='hs-varid'>f</span> <span class='hs-varid'>u</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Just</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getEventText</span> <span class='hs-varid'>f</span> <span class='hs-varid'>u</span> <span class='hs-varid'>h</span>
+<a name="line-83"></a>
+<a name="line-84"></a>    <span class='hs-comment'>{- |If a module failed earlier this will be called in periodicly
+<a name="line-85"></a>       until the module returns true to indicate a successful recovery -}</span>
+<a name="line-86"></a>    <span class='hs-varid'>recoverModule</span> <span class='hs-keyglyph'>::</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Bool</span>
+<a name="line-87"></a>    <span class='hs-varid'>recoverModule</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>True</span>
+<a name="line-88"></a>
+<a name="line-89"></a><a name="pack"></a><span class='hs-comment'>-- |Function to make packaging modules easier</span>
+<a name="line-90"></a><span class='hs-definition'>pack</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Module</span> <span class='hs-varid'>a</span>
+<a name="line-91"></a>     <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-comment'>-- ^The refresh rate for this module</span>
+<a name="line-92"></a>     <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The function to get a module (get??Handle)</span>
+<a name="line-93"></a>     <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Modules</span> <span class='hs-comment'>-- ^The packed module ready to be given to 'startLoop'</span>
+<a name="line-94"></a><span class='hs-definition'>pack</span> <span class='hs-varid'>i</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-layout'>(</span><span class='hs-varid'>flip</span> <span class='hs-conid'>MW</span> <span class='hs-varid'>i</span><span class='hs-layout'>)</span>
 </pre></body>
 </html>
