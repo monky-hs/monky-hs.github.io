@@ -10,176 +10,177 @@
 <pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE TypeSynonymInstances #-}</span>
 <a name="line-2"></a><span class='hs-comment'>{-# LANGUAGE FlexibleInstances #-}</span>
 <a name="line-3"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
-<a name="line-4"></a>
-<a name="line-5"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Network</span><span class='hs-varop'>.</span><span class='hs-conid'>Dynamic</span>
-<a name="line-6"></a>  <span class='hs-layout'>(</span> <span class='hs-varid'>getUHandles</span>
-<a name="line-7"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>UHandles</span>
-<a name="line-8"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Handles</span>
-<a name="line-9"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getMultiReadWrite</span>
-<a name="line-10"></a>  <span class='hs-layout'>)</span>
-<a name="line-11"></a><span class='hs-keyword'>where</span>
+<a name="line-4"></a><span class='hs-comment'>{-|
+<a name="line-5"></a>Module      : Monky.Network.Dynamic
+<a name="line-6"></a>Description : Allows access to information about they systems network
+<a name="line-7"></a>Maintainer  : ongy
+<a name="line-8"></a>Stability   : testing
+<a name="line-9"></a>Portability : Linux
+<a name="line-10"></a>
+<a name="line-11"></a>This module exports a handle to access dynamic network configurations.
 <a name="line-12"></a>
-<a name="line-13"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Bits</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>.|.</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-14"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span> <span class='hs-layout'>(</span><span class='hs-varid'>when</span><span class='hs-layout'>)</span>
-<a name="line-15"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Concurrent</span> <span class='hs-layout'>(</span><span class='hs-varid'>forkIO</span><span class='hs-layout'>,</span> <span class='hs-varid'>threadWaitRead</span><span class='hs-layout'>)</span>
-<a name="line-16"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>IntMap</span><span class='hs-varop'>.</span><span class='hs-conid'>Strict</span> <span class='hs-layout'>(</span><span class='hs-conid'>IntMap</span><span class='hs-layout'>)</span>
-<a name="line-17"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>IntMap</span><span class='hs-varop'>.</span><span class='hs-conid'>Strict</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>IM</span>
-<a name="line-18"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Map</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>M</span>
-<a name="line-19"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>IORef</span>
-<a name="line-20"></a>
-<a name="line-21"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>ByteString</span><span class='hs-varop'>.</span><span class='hs-conid'>Char8</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>BS</span>
-<a name="line-22"></a>
-<a name="line-23"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Linux</span><span class='hs-varop'>.</span><span class='hs-conid'>Netlink</span>
-<a name="line-24"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Linux</span><span class='hs-varop'>.</span><span class='hs-conid'>Netlink</span><span class='hs-varop'>.</span><span class='hs-conid'>Constants</span>
-<a name="line-25"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Linux</span><span class='hs-varop'>.</span><span class='hs-conid'>Netlink</span><span class='hs-varop'>.</span><span class='hs-conid'>Route</span>
-<a name="line-26"></a>
-<a name="line-27"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Network</span><span class='hs-varop'>.</span><span class='hs-conid'>Static</span>
-<a name="line-28"></a>
-<a name="line-29"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
-<a name="line-30"></a><span class='hs-cpp'>#else</span>
-<a name="line-31"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Applicative</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;$&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-32"></a><span class='hs-cpp'>#endif</span>
-<a name="line-33"></a>
-<a name="line-34"></a><a name="NetHandle"></a><span class='hs-comment'>-- |A Wrapper than also carries the name, for comparision</span>
-<a name="line-35"></a><a name="NetHandle"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>NetHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span><span class='hs-layout'>,</span> <span class='hs-conid'>NetworkHandle</span><span class='hs-layout'>)</span>
-<a name="line-36"></a>
-<a name="line-37"></a><a name="Handles"></a><span class='hs-comment'>-- |The map we keep our handles in (the Int is the Interface ID on the system)</span>
-<a name="line-38"></a><a name="Handles"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>IntMap</span> <span class='hs-conid'>NetHandle</span>
-<a name="line-39"></a>
-<a name="line-40"></a><a name="UHandles"></a><span class='hs-comment'>-- |The actual handel exposed and used by this module</span>
-<a name="line-41"></a><a name="UHandles"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-conid'>IORef</span> <span class='hs-conid'>Handles</span><span class='hs-layout'>,</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span>
-<a name="line-42"></a>
-<a name="line-43"></a><a name="instance%20%7b-%23%20OVERLAPPING%20%23-%7d%20Show%20NetHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-comment'>{-# OVERLAPPING #-}</span> <span class='hs-conid'>Show</span> <span class='hs-conid'>NetHandle</span> <span class='hs-keyword'>where</span>
-<a name="line-44"></a>  <span class='hs-varid'>show</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-layout'>,</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>x</span>
+<a name="line-13"></a>This will update when a new network interface appears or disappears.
+<a name="line-14"></a>The value returned by this will be the sum over all interfaces.
+<a name="line-15"></a>-}</span>
+<a name="line-16"></a>
+<a name="line-17"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Network</span><span class='hs-varop'>.</span><span class='hs-conid'>Dynamic</span>
+<a name="line-18"></a>  <span class='hs-layout'>(</span> <span class='hs-varid'>getUHandles</span>
+<a name="line-19"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>UHandles</span>
+<a name="line-20"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Handles</span>
+<a name="line-21"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getMultiReadWrite</span>
+<a name="line-22"></a>  <span class='hs-layout'>)</span>
+<a name="line-23"></a><span class='hs-keyword'>where</span>
+<a name="line-24"></a>
+<a name="line-25"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Bits</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>.|.</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-26"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span> <span class='hs-layout'>(</span><span class='hs-varid'>when</span><span class='hs-layout'>)</span>
+<a name="line-27"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Concurrent</span> <span class='hs-layout'>(</span><span class='hs-varid'>forkIO</span><span class='hs-layout'>,</span> <span class='hs-varid'>threadWaitRead</span><span class='hs-layout'>)</span>
+<a name="line-28"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>IntMap</span><span class='hs-varop'>.</span><span class='hs-conid'>Strict</span> <span class='hs-layout'>(</span><span class='hs-conid'>IntMap</span><span class='hs-layout'>)</span>
+<a name="line-29"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>IntMap</span><span class='hs-varop'>.</span><span class='hs-conid'>Strict</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>IM</span>
+<a name="line-30"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Map</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>M</span>
+<a name="line-31"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>IORef</span>
+<a name="line-32"></a>
+<a name="line-33"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>ByteString</span><span class='hs-varop'>.</span><span class='hs-conid'>Char8</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>BS</span>
+<a name="line-34"></a>
+<a name="line-35"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Linux</span><span class='hs-varop'>.</span><span class='hs-conid'>Netlink</span>
+<a name="line-36"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Linux</span><span class='hs-varop'>.</span><span class='hs-conid'>Netlink</span><span class='hs-varop'>.</span><span class='hs-conid'>Constants</span>
+<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Linux</span><span class='hs-varop'>.</span><span class='hs-conid'>Netlink</span><span class='hs-varop'>.</span><span class='hs-conid'>Route</span>
+<a name="line-38"></a>
+<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Network</span><span class='hs-varop'>.</span><span class='hs-conid'>Static</span>
+<a name="line-40"></a>
+<a name="line-41"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
+<a name="line-42"></a><span class='hs-cpp'>#else</span>
+<a name="line-43"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Applicative</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;$&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-44"></a><span class='hs-cpp'>#endif</span>
 <a name="line-45"></a>
-<a name="line-46"></a>
-<a name="line-47"></a><a name="foldF"></a><span class='hs-comment'>-- |The fold function used for 'getMultiReadWrite' handling the IO and Maybe stuff</span>
-<a name="line-48"></a><span class='hs-definition'>foldF</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetworkHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-49"></a><span class='hs-definition'>foldF</span> <span class='hs-varid'>h</span> <span class='hs-varid'>o</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-50"></a>  <span class='hs-varid'>m</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getReadWrite</span> <span class='hs-varid'>h</span>
-<a name="line-51"></a>  <span class='hs-keyword'>case</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>of</span>
-<a name="line-52"></a>    <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span>
-<a name="line-53"></a>      <span class='hs-varid'>om</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>o</span>
-<a name="line-54"></a>      <span class='hs-keyword'>case</span> <span class='hs-varid'>om</span> <span class='hs-keyword'>of</span>
-<a name="line-55"></a>        <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>oldr</span><span class='hs-layout'>,</span> <span class='hs-varid'>oldw</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>oldr</span> <span class='hs-varop'>+</span> <span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-varid'>oldw</span> <span class='hs-varop'>+</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span>
-<a name="line-56"></a>        <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span>
-<a name="line-57"></a>    <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>o</span>
+<a name="line-46"></a><a name="NetHandle"></a><span class='hs-comment'>-- |A Wrapper than also carries the name, for comparision</span>
+<a name="line-47"></a><a name="NetHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>NetHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>NetHandle</span> <span class='hs-conid'>String</span> <span class='hs-conid'>NetworkHandle</span>
+<a name="line-48"></a>
+<a name="line-49"></a><a name="Handles"></a><span class='hs-comment'>-- |The map we keep our handles in (the Int is the Interface ID on the system)</span>
+<a name="line-50"></a><a name="Handles"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>IntMap</span> <span class='hs-conid'>NetHandle</span>
+<a name="line-51"></a>
+<a name="line-52"></a><a name="UHandles"></a><span class='hs-comment'>-- |The actual handel exposed and used by this module</span>
+<a name="line-53"></a><a name="UHandles"></a><span class='hs-keyword'>type</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-conid'>IORef</span> <span class='hs-conid'>Handles</span><span class='hs-layout'>,</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span>
+<a name="line-54"></a>
+<a name="line-55"></a><a name="instance%20Show%20NetHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Show</span> <span class='hs-conid'>NetHandle</span> <span class='hs-keyword'>where</span>
+<a name="line-56"></a>  <span class='hs-varid'>show</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHandle</span> <span class='hs-varid'>x</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>x</span>
+<a name="line-57"></a>
 <a name="line-58"></a>
-<a name="line-59"></a>
-<a name="line-60"></a><a name="getMultiReadWrite"></a><span class='hs-comment'>-- |Get the sum of all read/write rates from our network devices or Nothing if none is active</span>
-<a name="line-61"></a><span class='hs-definition'>getMultiReadWrite</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-62"></a><span class='hs-definition'>getMultiReadWrite</span> <span class='hs-keyglyph'>=</span>
-<a name="line-63"></a>  <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>foldr</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-layout'>(</span><span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>foldF</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>return</span> <span class='hs-conid'>Nothing</span><span class='hs-layout'>)</span>
-<a name="line-64"></a>
-<a name="line-65"></a>
-<a name="line-66"></a><a name="gotNew"></a><span class='hs-comment'>-- |Logic for adding a new device to our Handles</span>
-<a name="line-67"></a><span class='hs-definition'>gotNew</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Handles</span>
-<a name="line-68"></a><span class='hs-definition'>gotNew</span> <span class='hs-varid'>index</span> <span class='hs-varid'>name</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span>
-<a name="line-69"></a>  <span class='hs-keyword'>case</span> <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>of</span>
-<a name="line-70"></a>    <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span>
-<a name="line-71"></a>      <span class='hs-varid'>h</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandle</span> <span class='hs-varid'>name</span>
-<a name="line-72"></a>      <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>insert</span> <span class='hs-varid'>index</span> <span class='hs-layout'>(</span><span class='hs-varid'>name</span><span class='hs-layout'>,</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-varid'>m</span>
-<a name="line-73"></a>    <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span><span class='hs-layout'>,</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>if</span> <span class='hs-varid'>x</span> <span class='hs-varop'>==</span> <span class='hs-varid'>name</span>
-<a name="line-74"></a>      <span class='hs-keyword'>then</span> <span class='hs-varid'>return</span> <span class='hs-varid'>m</span>
-<a name="line-75"></a>      <span class='hs-keyword'>else</span> <span class='hs-keyword'>do</span>
-<a name="line-76"></a>        <span class='hs-varid'>h</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandle</span> <span class='hs-varid'>name</span>
-<a name="line-77"></a>        <span class='hs-varid'>closeNetworkHandle</span> <span class='hs-varid'>v</span>
-<a name="line-78"></a>        <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>adjust</span> <span class='hs-layout'>(</span><span class='hs-varid'>const</span> <span class='hs-layout'>(</span><span class='hs-varid'>name</span><span class='hs-layout'>,</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span>
-<a name="line-79"></a>
-<a name="line-80"></a>
-<a name="line-81"></a><a name="lostOld"></a><span class='hs-comment'>-- |Logic for removing a handle form Handles after we lost the interface</span>
-<a name="line-82"></a><span class='hs-definition'>lostOld</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Handles</span>
-<a name="line-83"></a><span class='hs-definition'>lostOld</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>case</span> <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>of</span>
-<a name="line-84"></a>  <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varid'>m</span>
-<a name="line-85"></a>  <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span>
-<a name="line-86"></a>    <span class='hs-varid'>closeNetworkHandle</span> <span class='hs-varid'>h</span> <span class='hs-varop'>&gt;&gt;</span>
-<a name="line-87"></a>    <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>delete</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span><span class='hs-layout'>)</span>
-<a name="line-88"></a>
+<a name="line-59"></a><a name="foldF"></a><span class='hs-comment'>-- |The fold function used for 'getMultiReadWrite' handling the IO and Maybe stuff</span>
+<a name="line-60"></a><span class='hs-definition'>foldF</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetworkHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-61"></a><span class='hs-definition'>foldF</span> <span class='hs-varid'>h</span> <span class='hs-varid'>o</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-62"></a>  <span class='hs-varid'>m</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getReadWrite</span> <span class='hs-varid'>h</span>
+<a name="line-63"></a>  <span class='hs-keyword'>case</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>of</span>
+<a name="line-64"></a>    <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span>
+<a name="line-65"></a>      <span class='hs-varid'>om</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>o</span>
+<a name="line-66"></a>      <span class='hs-keyword'>case</span> <span class='hs-varid'>om</span> <span class='hs-keyword'>of</span>
+<a name="line-67"></a>        <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>oldr</span><span class='hs-layout'>,</span> <span class='hs-varid'>oldw</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>oldr</span> <span class='hs-varop'>+</span> <span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-varid'>oldw</span> <span class='hs-varop'>+</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span>
+<a name="line-68"></a>        <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>r</span><span class='hs-layout'>,</span> <span class='hs-varid'>w</span><span class='hs-layout'>)</span>
+<a name="line-69"></a>    <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>o</span>
+<a name="line-70"></a>
+<a name="line-71"></a><a name="getMultiReadWrite"></a><span class='hs-comment'>-- |Get the sum of all read/write rates from our network devices or Nothing if none is active</span>
+<a name="line-72"></a><span class='hs-definition'>getMultiReadWrite</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>Int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-73"></a><span class='hs-definition'>getMultiReadWrite</span> <span class='hs-keyglyph'>=</span>
+<a name="line-74"></a>  <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>foldr</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span><span class='hs-layout'>(</span><span class='hs-conid'>NetHandle</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>foldF</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>return</span> <span class='hs-conid'>Nothing</span><span class='hs-layout'>)</span>
+<a name="line-75"></a>
+<a name="line-76"></a><a name="gotNew"></a><span class='hs-comment'>-- |Logic for adding a new device to our Handles</span>
+<a name="line-77"></a><span class='hs-definition'>gotNew</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Handles</span>
+<a name="line-78"></a><span class='hs-definition'>gotNew</span> <span class='hs-varid'>index</span> <span class='hs-varid'>name</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span>
+<a name="line-79"></a>  <span class='hs-keyword'>case</span> <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>of</span>
+<a name="line-80"></a>    <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span>
+<a name="line-81"></a>      <span class='hs-varid'>h</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandle</span> <span class='hs-varid'>name</span>
+<a name="line-82"></a>      <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>insert</span> <span class='hs-varid'>index</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHandle</span> <span class='hs-varid'>name</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-varid'>m</span>
+<a name="line-83"></a>    <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHandle</span> <span class='hs-varid'>x</span> <span class='hs-varid'>v</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>if</span> <span class='hs-varid'>x</span> <span class='hs-varop'>==</span> <span class='hs-varid'>name</span>
+<a name="line-84"></a>      <span class='hs-keyword'>then</span> <span class='hs-varid'>return</span> <span class='hs-varid'>m</span>
+<a name="line-85"></a>      <span class='hs-keyword'>else</span> <span class='hs-keyword'>do</span>
+<a name="line-86"></a>        <span class='hs-varid'>h</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandle</span> <span class='hs-varid'>name</span>
+<a name="line-87"></a>        <span class='hs-varid'>closeNetworkHandle</span> <span class='hs-varid'>v</span>
+<a name="line-88"></a>        <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>adjust</span> <span class='hs-layout'>(</span><span class='hs-varid'>const</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHandle</span> <span class='hs-varid'>name</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span>
 <a name="line-89"></a>
-<a name="line-90"></a><a name="requestPacket"></a><span class='hs-comment'>-- |The packet used to drump all current network devices</span>
-<a name="line-91"></a><span class='hs-definition'>requestPacket</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>RoutePacket</span>
-<a name="line-92"></a><span class='hs-definition'>requestPacket</span> <span class='hs-keyglyph'>=</span>
-<a name="line-93"></a>  <span class='hs-keyword'>let</span> <span class='hs-varid'>flags</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fNLM_F_REQUEST</span> <span class='hs-varop'>.|.</span> <span class='hs-varid'>fNLM_F_MATCH</span> <span class='hs-varop'>.|.</span> <span class='hs-varid'>fNLM_F_ROOT</span>
-<a name="line-94"></a>      <span class='hs-varid'>header</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Header</span> <span class='hs-varid'>eRTM_GETLINK</span> <span class='hs-varid'>flags</span> <span class='hs-num'>42</span> <span class='hs-num'>0</span>
-<a name="line-95"></a>      <span class='hs-varid'>msg</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>NLinkMsg</span> <span class='hs-num'>0</span> <span class='hs-num'>0</span> <span class='hs-num'>0</span> <span class='hs-keyword'>in</span>
-<a name="line-96"></a>    <span class='hs-conid'>Packet</span> <span class='hs-varid'>header</span> <span class='hs-varid'>msg</span> <span class='hs-conid'>M</span><span class='hs-varop'>.</span><span class='hs-varid'>empty</span>
+<a name="line-90"></a><a name="lostOld"></a><span class='hs-comment'>-- |Logic for removing a handle form Handles after we lost the interface</span>
+<a name="line-91"></a><span class='hs-definition'>lostOld</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Handles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Handles</span>
+<a name="line-92"></a><span class='hs-definition'>lostOld</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>case</span> <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span> <span class='hs-keyword'>of</span>
+<a name="line-93"></a>  <span class='hs-conid'>Nothing</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varid'>m</span>
+<a name="line-94"></a>  <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-conid'>NetHandle</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span>
+<a name="line-95"></a>    <span class='hs-varid'>closeNetworkHandle</span> <span class='hs-varid'>h</span> <span class='hs-varop'>&gt;&gt;</span>
+<a name="line-96"></a>    <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>delete</span> <span class='hs-varid'>index</span> <span class='hs-varid'>m</span><span class='hs-layout'>)</span>
 <a name="line-97"></a>
-<a name="line-98"></a>
-<a name="line-99"></a><a name="readInterface"></a><span class='hs-comment'>-- |Read the interface name and index from 'RoutePacket'</span>
-<a name="line-100"></a><span class='hs-definition'>readInterface</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>RoutePacket</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>String</span><span class='hs-layout'>)</span>
-<a name="line-101"></a><span class='hs-definition'>readInterface</span> <span class='hs-layout'>(</span><span class='hs-conid'>Packet</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>msg</span> <span class='hs-varid'>attrs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-102"></a>  <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>M</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>eIFLA_IFNAME</span> <span class='hs-varid'>attrs</span>
-<a name="line-103"></a>      <span class='hs-varid'>names</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>init</span> <span class='hs-varop'>$</span> <span class='hs-conid'>BS</span><span class='hs-varop'>.</span><span class='hs-varid'>unpack</span> <span class='hs-varid'>name</span> <span class='hs-comment'>-- Drop \0</span>
-<a name="line-104"></a>      <span class='hs-varid'>index</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>interfaceIndex</span> <span class='hs-varid'>msg</span> <span class='hs-keyword'>in</span>
-<a name="line-105"></a>    <span class='hs-layout'>(</span><span class='hs-varid'>fromIntegral</span> <span class='hs-varid'>index</span><span class='hs-layout'>,</span> <span class='hs-varid'>names</span><span class='hs-layout'>)</span>
-<a name="line-106"></a><span class='hs-definition'>readInterface</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-layout'>(</span><span class='hs-str'>"Something went wrong while getting interfaces: "</span> <span class='hs-varop'>++</span> <span class='hs-varid'>show</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span>
-<a name="line-107"></a>
-<a name="line-108"></a>
-<a name="line-109"></a><a name="getCurrentDevs"></a><span class='hs-comment'>-- |Get all current interfaces from our system</span>
-<a name="line-110"></a><span class='hs-definition'>getCurrentDevs</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>String</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
-<a name="line-111"></a><span class='hs-definition'>getCurrentDevs</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-112"></a>  <span class='hs-varid'>sock</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>makeSocket</span>
-<a name="line-113"></a>  <span class='hs-varid'>ifs</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>query</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>requestPacket</span>
-<a name="line-114"></a>  <span class='hs-varid'>closeSocket</span> <span class='hs-varid'>sock</span>
-<a name="line-115"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-varid'>map</span> <span class='hs-varid'>readInterface</span> <span class='hs-varid'>ifs</span>
-<a name="line-116"></a>
-<a name="line-117"></a>
-<a name="line-118"></a><a name="getNetworkHandles"></a><span class='hs-comment'>-- |Get the 'Handles' wrapper for all current interfaces</span>
-<a name="line-119"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Handles</span>
-<a name="line-120"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-121"></a>  <span class='hs-varid'>interfaces</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>filter</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>snd</span><span class='hs-layout'>)</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getCurrentDevs</span>
-<a name="line-122"></a>  <span class='hs-varid'>foldr</span> <span class='hs-varid'>build</span> <span class='hs-layout'>(</span><span class='hs-varid'>return</span> <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>empty</span><span class='hs-layout'>)</span> <span class='hs-varid'>interfaces</span>
-<a name="line-123"></a>  <span class='hs-keyword'>where</span> <span class='hs-varid'>build</span> <span class='hs-layout'>(</span><span class='hs-varid'>index</span><span class='hs-layout'>,</span> <span class='hs-varid'>dev</span><span class='hs-layout'>)</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span>
-<a name="line-124"></a>          <span class='hs-varid'>gotNew</span> <span class='hs-varid'>index</span> <span class='hs-varid'>dev</span> <span class='hs-varop'>=&lt;&lt;</span> <span class='hs-varid'>m</span>
-<a name="line-125"></a>
-<a name="line-126"></a>
-<a name="line-127"></a><a name="doUpdate"></a><span class='hs-comment'>-- |Handle an incomming rtneltink message and update the handle</span>
-<a name="line-128"></a><span class='hs-definition'>doUpdate</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>RoutePacket</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span>
-<a name="line-129"></a><span class='hs-definition'>doUpdate</span> <span class='hs-layout'>(</span><span class='hs-varid'>mr</span><span class='hs-layout'>,</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Packet</span> <span class='hs-varid'>hdr</span> <span class='hs-varid'>msg</span> <span class='hs-varid'>attrs</span><span class='hs-layout'>)</span>
-<a name="line-130"></a><span class='hs-comment'>-- for now we will assume that we want the interface</span>
-<a name="line-131"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>messageType</span> <span class='hs-varid'>hdr</span> <span class='hs-varop'>==</span> <span class='hs-varid'>eRTM_NEWLINK</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-132"></a>    <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>M</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>eIFLA_IFNAME</span> <span class='hs-varid'>attrs</span>
-<a name="line-133"></a>    <span class='hs-keyword'>let</span> <span class='hs-varid'>names</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>init</span> <span class='hs-varop'>$</span><span class='hs-conid'>BS</span><span class='hs-varop'>.</span><span class='hs-varid'>unpack</span> <span class='hs-varid'>name</span> <span class='hs-comment'>-- Drop \0</span>
-<a name="line-134"></a>    <span class='hs-varid'>when</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varid'>names</span><span class='hs-layout'>)</span> <span class='hs-varop'>$</span> <span class='hs-keyword'>do</span> <span class='hs-comment'>-- Add</span>
-<a name="line-135"></a>      <span class='hs-keyword'>let</span> <span class='hs-varid'>index</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>interfaceIndex</span> <span class='hs-varid'>msg</span>
-<a name="line-136"></a>      <span class='hs-varid'>m</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readIORef</span> <span class='hs-varid'>mr</span>
-<a name="line-137"></a>      <span class='hs-varid'>nm</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>gotNew</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromIntegral</span> <span class='hs-varid'>index</span><span class='hs-layout'>)</span> <span class='hs-varid'>names</span> <span class='hs-varid'>m</span>
-<a name="line-138"></a>      <span class='hs-varid'>writeIORef</span> <span class='hs-varid'>mr</span> <span class='hs-varid'>nm</span>
-<a name="line-139"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>messageType</span> <span class='hs-varid'>hdr</span> <span class='hs-varop'>==</span> <span class='hs-varid'>eRTM_DELLINK</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-140"></a>    <span class='hs-keyword'>let</span> <span class='hs-varid'>index</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>interfaceIndex</span> <span class='hs-varid'>msg</span>
-<a name="line-141"></a>    <span class='hs-varid'>m</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readIORef</span> <span class='hs-varid'>mr</span>
-<a name="line-142"></a>    <span class='hs-varid'>nm</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>lostOld</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromIntegral</span> <span class='hs-varid'>index</span><span class='hs-layout'>)</span> <span class='hs-varid'>m</span>
-<a name="line-143"></a>    <span class='hs-varid'>writeIORef</span> <span class='hs-varid'>mr</span> <span class='hs-varid'>nm</span>
-<a name="line-144"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>()</span>
-<a name="line-145"></a><span class='hs-comment'>-- Ignore everything else</span>
-<a name="line-146"></a><span class='hs-definition'>doUpdate</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>()</span>
-<a name="line-147"></a>
-<a name="line-148"></a>
-<a name="line-149"></a><a name="updaterLoop"></a><span class='hs-comment'>-- |Updater loop, it blocks on the netlink socker until it gets a message</span>
-<a name="line-150"></a><span class='hs-definition'>updaterLoop</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetlinkSocket</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span>
-<a name="line-151"></a><span class='hs-definition'>updaterLoop</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-152"></a>  <span class='hs-varid'>threadWaitRead</span> <span class='hs-layout'>(</span><span class='hs-varid'>getNetlinkFd</span> <span class='hs-varid'>sock</span><span class='hs-layout'>)</span>
-<a name="line-153"></a>  <span class='hs-varid'>packet</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>recvOne</span> <span class='hs-varid'>sock</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>RoutePacket</span><span class='hs-keyglyph'>]</span>
-<a name="line-154"></a>  <span class='hs-varid'>mapM_</span> <span class='hs-layout'>(</span><span class='hs-varid'>doUpdate</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-varid'>packet</span>
-<a name="line-155"></a>  <span class='hs-varid'>updaterLoop</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>h</span>
-<a name="line-156"></a>
-<a name="line-157"></a>
-<a name="line-158"></a><a name="updater"></a><span class='hs-comment'>-- |Start the update loop for adding/removing interfaces</span>
-<a name="line-159"></a><span class='hs-definition'>updater</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span>
-<a name="line-160"></a><span class='hs-definition'>updater</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-161"></a>  <span class='hs-varid'>sock</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>makeSocket</span>
-<a name="line-162"></a>  <span class='hs-varid'>joinMulticastGroup</span> <span class='hs-varid'>sock</span> <span class='hs-num'>1</span>
-<a name="line-163"></a>  <span class='hs-varid'>updaterLoop</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>h</span>
-<a name="line-164"></a>
-<a name="line-165"></a>
-<a name="line-166"></a><a name="getUHandles"></a><span class='hs-comment'>-- |Get the new handle this module exports and start its updater loop</span>
-<a name="line-167"></a><span class='hs-definition'>getUHandles</span>
-<a name="line-168"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-comment'>-- ^Will be given the name of the handle, only add interface if this returns true (think of it as filter over all possible interfaces)</span>
-<a name="line-169"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>UHandles</span>
-<a name="line-170"></a><span class='hs-definition'>getUHandles</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-171"></a>  <span class='hs-varid'>handle</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandles</span> <span class='hs-varid'>f</span>
-<a name="line-172"></a>  <span class='hs-varid'>ref</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>newIORef</span> <span class='hs-varid'>handle</span>
-<a name="line-173"></a>  <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>forkIO</span> <span class='hs-layout'>(</span><span class='hs-varid'>updater</span> <span class='hs-layout'>(</span><span class='hs-varid'>ref</span><span class='hs-layout'>,</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-174"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>ref</span><span class='hs-layout'>,</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
+<a name="line-98"></a><a name="requestPacket"></a><span class='hs-comment'>-- |The packet used to drump all current network devices</span>
+<a name="line-99"></a><span class='hs-definition'>requestPacket</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>RoutePacket</span>
+<a name="line-100"></a><span class='hs-definition'>requestPacket</span> <span class='hs-keyglyph'>=</span>
+<a name="line-101"></a>  <span class='hs-keyword'>let</span> <span class='hs-varid'>flags</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fNLM_F_REQUEST</span> <span class='hs-varop'>.|.</span> <span class='hs-varid'>fNLM_F_MATCH</span> <span class='hs-varop'>.|.</span> <span class='hs-varid'>fNLM_F_ROOT</span>
+<a name="line-102"></a>      <span class='hs-varid'>header</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>Header</span> <span class='hs-varid'>eRTM_GETLINK</span> <span class='hs-varid'>flags</span> <span class='hs-num'>42</span> <span class='hs-num'>0</span>
+<a name="line-103"></a>      <span class='hs-varid'>msg</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>NLinkMsg</span> <span class='hs-num'>0</span> <span class='hs-num'>0</span> <span class='hs-num'>0</span> <span class='hs-keyword'>in</span>
+<a name="line-104"></a>    <span class='hs-conid'>Packet</span> <span class='hs-varid'>header</span> <span class='hs-varid'>msg</span> <span class='hs-conid'>M</span><span class='hs-varop'>.</span><span class='hs-varid'>empty</span>
+<a name="line-105"></a>
+<a name="line-106"></a><a name="readInterface"></a><span class='hs-comment'>-- |Read the interface name and index from 'RoutePacket'</span>
+<a name="line-107"></a><span class='hs-definition'>readInterface</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>RoutePacket</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>String</span><span class='hs-layout'>)</span>
+<a name="line-108"></a><span class='hs-definition'>readInterface</span> <span class='hs-layout'>(</span><span class='hs-conid'>Packet</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>msg</span> <span class='hs-varid'>attrs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-109"></a>  <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>M</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>eIFLA_IFNAME</span> <span class='hs-varid'>attrs</span>
+<a name="line-110"></a>      <span class='hs-varid'>names</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>init</span> <span class='hs-varop'>$</span> <span class='hs-conid'>BS</span><span class='hs-varop'>.</span><span class='hs-varid'>unpack</span> <span class='hs-varid'>name</span> <span class='hs-comment'>-- Drop \0</span>
+<a name="line-111"></a>      <span class='hs-varid'>index</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>interfaceIndex</span> <span class='hs-varid'>msg</span> <span class='hs-keyword'>in</span>
+<a name="line-112"></a>    <span class='hs-layout'>(</span><span class='hs-varid'>fromIntegral</span> <span class='hs-varid'>index</span><span class='hs-layout'>,</span> <span class='hs-varid'>names</span><span class='hs-layout'>)</span>
+<a name="line-113"></a><span class='hs-definition'>readInterface</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>error</span> <span class='hs-layout'>(</span><span class='hs-str'>"Something went wrong while getting interfaces: "</span> <span class='hs-varop'>++</span> <span class='hs-varid'>show</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span>
+<a name="line-114"></a>
+<a name="line-115"></a><a name="getCurrentDevs"></a><span class='hs-comment'>-- |Get all current interfaces from our system</span>
+<a name="line-116"></a><span class='hs-definition'>getCurrentDevs</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Int</span><span class='hs-layout'>,</span> <span class='hs-conid'>String</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
+<a name="line-117"></a><span class='hs-definition'>getCurrentDevs</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-118"></a>  <span class='hs-varid'>sock</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>makeSocket</span>
+<a name="line-119"></a>  <span class='hs-varid'>ifs</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>query</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>requestPacket</span>
+<a name="line-120"></a>  <span class='hs-varid'>closeSocket</span> <span class='hs-varid'>sock</span>
+<a name="line-121"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span><span class='hs-varid'>map</span> <span class='hs-varid'>readInterface</span> <span class='hs-varid'>ifs</span>
+<a name="line-122"></a>
+<a name="line-123"></a><a name="getNetworkHandles"></a><span class='hs-comment'>-- |Get the 'Handles' wrapper for all current interfaces</span>
+<a name="line-124"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Handles</span>
+<a name="line-125"></a><span class='hs-definition'>getNetworkHandles</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-126"></a>  <span class='hs-varid'>interfaces</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>filter</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varop'>.</span> <span class='hs-varid'>snd</span><span class='hs-layout'>)</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getCurrentDevs</span>
+<a name="line-127"></a>  <span class='hs-varid'>foldr</span> <span class='hs-varid'>build</span> <span class='hs-layout'>(</span><span class='hs-varid'>return</span> <span class='hs-conid'>IM</span><span class='hs-varop'>.</span><span class='hs-varid'>empty</span><span class='hs-layout'>)</span> <span class='hs-varid'>interfaces</span>
+<a name="line-128"></a>  <span class='hs-keyword'>where</span> <span class='hs-varid'>build</span> <span class='hs-layout'>(</span><span class='hs-varid'>index</span><span class='hs-layout'>,</span> <span class='hs-varid'>dev</span><span class='hs-layout'>)</span> <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span>
+<a name="line-129"></a>          <span class='hs-varid'>gotNew</span> <span class='hs-varid'>index</span> <span class='hs-varid'>dev</span> <span class='hs-varop'>=&lt;&lt;</span> <span class='hs-varid'>m</span>
+<a name="line-130"></a>
+<a name="line-131"></a><a name="doUpdate"></a><span class='hs-comment'>-- |Handle an incomming rtneltink message and update the handle</span>
+<a name="line-132"></a><span class='hs-definition'>doUpdate</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>RoutePacket</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span>
+<a name="line-133"></a><span class='hs-definition'>doUpdate</span> <span class='hs-layout'>(</span><span class='hs-varid'>mr</span><span class='hs-layout'>,</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>Packet</span> <span class='hs-varid'>hdr</span> <span class='hs-varid'>msg</span> <span class='hs-varid'>attrs</span><span class='hs-layout'>)</span>
+<a name="line-134"></a><span class='hs-comment'>-- for now we will assume that we want the interface</span>
+<a name="line-135"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>messageType</span> <span class='hs-varid'>hdr</span> <span class='hs-varop'>==</span> <span class='hs-varid'>eRTM_NEWLINK</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-136"></a>    <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-conid'>Just</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>M</span><span class='hs-varop'>.</span><span class='hs-varid'>lookup</span> <span class='hs-varid'>eIFLA_IFNAME</span> <span class='hs-varid'>attrs</span>
+<a name="line-137"></a>    <span class='hs-keyword'>let</span> <span class='hs-varid'>names</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>init</span> <span class='hs-varop'>$</span><span class='hs-conid'>BS</span><span class='hs-varop'>.</span><span class='hs-varid'>unpack</span> <span class='hs-varid'>name</span> <span class='hs-comment'>-- Drop \0</span>
+<a name="line-138"></a>    <span class='hs-varid'>when</span> <span class='hs-layout'>(</span><span class='hs-varid'>f</span> <span class='hs-varid'>names</span><span class='hs-layout'>)</span> <span class='hs-varop'>$</span> <span class='hs-keyword'>do</span> <span class='hs-comment'>-- Add</span>
+<a name="line-139"></a>      <span class='hs-keyword'>let</span> <span class='hs-varid'>index</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>interfaceIndex</span> <span class='hs-varid'>msg</span>
+<a name="line-140"></a>      <span class='hs-varid'>m</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readIORef</span> <span class='hs-varid'>mr</span>
+<a name="line-141"></a>      <span class='hs-varid'>nm</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>gotNew</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromIntegral</span> <span class='hs-varid'>index</span><span class='hs-layout'>)</span> <span class='hs-varid'>names</span> <span class='hs-varid'>m</span>
+<a name="line-142"></a>      <span class='hs-varid'>writeIORef</span> <span class='hs-varid'>mr</span> <span class='hs-varid'>nm</span>
+<a name="line-143"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>messageType</span> <span class='hs-varid'>hdr</span> <span class='hs-varop'>==</span> <span class='hs-varid'>eRTM_DELLINK</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-144"></a>    <span class='hs-keyword'>let</span> <span class='hs-varid'>index</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>interfaceIndex</span> <span class='hs-varid'>msg</span>
+<a name="line-145"></a>    <span class='hs-varid'>m</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readIORef</span> <span class='hs-varid'>mr</span>
+<a name="line-146"></a>    <span class='hs-varid'>nm</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>lostOld</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromIntegral</span> <span class='hs-varid'>index</span><span class='hs-layout'>)</span> <span class='hs-varid'>m</span>
+<a name="line-147"></a>    <span class='hs-varid'>writeIORef</span> <span class='hs-varid'>mr</span> <span class='hs-varid'>nm</span>
+<a name="line-148"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>()</span>
+<a name="line-149"></a><span class='hs-comment'>-- Ignore everything else</span>
+<a name="line-150"></a><span class='hs-definition'>doUpdate</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>return</span> <span class='hs-conid'>()</span>
+<a name="line-151"></a>
+<a name="line-152"></a><a name="updaterLoop"></a><span class='hs-comment'>-- |Updater loop, it blocks on the netlink socker until it gets a message</span>
+<a name="line-153"></a><span class='hs-definition'>updaterLoop</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>NetlinkSocket</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span>
+<a name="line-154"></a><span class='hs-definition'>updaterLoop</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-155"></a>  <span class='hs-varid'>threadWaitRead</span> <span class='hs-layout'>(</span><span class='hs-varid'>getNetlinkFd</span> <span class='hs-varid'>sock</span><span class='hs-layout'>)</span>
+<a name="line-156"></a>  <span class='hs-varid'>packet</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>recvOne</span> <span class='hs-varid'>sock</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>RoutePacket</span><span class='hs-keyglyph'>]</span>
+<a name="line-157"></a>  <span class='hs-varid'>mapM_</span> <span class='hs-layout'>(</span><span class='hs-varid'>doUpdate</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-varid'>packet</span>
+<a name="line-158"></a>  <span class='hs-varid'>updaterLoop</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>h</span>
+<a name="line-159"></a>
+<a name="line-160"></a><a name="updater"></a><span class='hs-comment'>-- |Start the update loop for adding/removing interfaces</span>
+<a name="line-161"></a><span class='hs-definition'>updater</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>UHandles</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>()</span>
+<a name="line-162"></a><span class='hs-definition'>updater</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-163"></a>  <span class='hs-varid'>sock</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>makeSocket</span>
+<a name="line-164"></a>  <span class='hs-varid'>joinMulticastGroup</span> <span class='hs-varid'>sock</span> <span class='hs-num'>1</span>
+<a name="line-165"></a>  <span class='hs-varid'>updaterLoop</span> <span class='hs-varid'>sock</span> <span class='hs-varid'>h</span>
+<a name="line-166"></a>
+<a name="line-167"></a><a name="getUHandles"></a><span class='hs-comment'>-- |Get the new handle this module exports and start its updater loop</span>
+<a name="line-168"></a><span class='hs-definition'>getUHandles</span>
+<a name="line-169"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Bool</span><span class='hs-layout'>)</span> <span class='hs-comment'>-- ^Will be given the name of the handle, only add interface if this returns true (think of it as filter over all possible interfaces)</span>
+<a name="line-170"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>UHandles</span>
+<a name="line-171"></a><span class='hs-definition'>getUHandles</span> <span class='hs-varid'>f</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-172"></a>  <span class='hs-varid'>handle</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getNetworkHandles</span> <span class='hs-varid'>f</span>
+<a name="line-173"></a>  <span class='hs-varid'>ref</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>newIORef</span> <span class='hs-varid'>handle</span>
+<a name="line-174"></a>  <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>forkIO</span> <span class='hs-layout'>(</span><span class='hs-varid'>updater</span> <span class='hs-layout'>(</span><span class='hs-varid'>ref</span><span class='hs-layout'>,</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-175"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>ref</span><span class='hs-layout'>,</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span>
 </pre></body>
 </html>

@@ -9,7 +9,7 @@
 <body>
 <pre><a name="line-1"></a><span class='hs-comment'>{-|
 <a name="line-2"></a>Module      : Monky.Examples.File
-<a name="line-3"></a>Description : An example module instance for the cpu module
+<a name="line-3"></a>Description : Display the first line in a file each tick
 <a name="line-4"></a>Maintainer  : ongy
 <a name="line-5"></a>Stability   : testing
 <a name="line-6"></a>Portability : Linux
@@ -24,15 +24,25 @@
 <a name="line-15"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
 <a name="line-16"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Utility</span> <span class='hs-layout'>(</span><span class='hs-varid'>fopen</span><span class='hs-layout'>,</span> <span class='hs-varid'>readLine</span><span class='hs-layout'>,</span> <span class='hs-conid'>File</span><span class='hs-layout'>)</span>
 <a name="line-17"></a>
-<a name="line-18"></a><a name="FileHandle"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>FileHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>FH</span> <span class='hs-conid'>File</span>
+<a name="line-18"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Text</span><span class='hs-varop'>.</span><span class='hs-conid'>Encoding</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>T</span>
 <a name="line-19"></a>
-<a name="line-20"></a><a name="getFile"></a><span class='hs-definition'>getFile</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FileHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>File</span>
-<a name="line-21"></a><span class='hs-definition'>getFile</span> <span class='hs-layout'>(</span><span class='hs-conid'>FH</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span>
+<a name="line-20"></a><a name="FileHandle"></a><span class='hs-comment'>-- |The handle type for this module</span>
+<a name="line-21"></a><a name="FileHandle"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>FileHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>FH</span> <span class='hs-conid'>File</span>
 <a name="line-22"></a>
-<a name="line-23"></a><a name="getFileHandle"></a><span class='hs-definition'>getFileHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>FileHandle</span>
-<a name="line-24"></a><span class='hs-definition'>getFileHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>FH</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fopen</span>
+<a name="line-23"></a><a name="getFile"></a><span class='hs-definition'>getFile</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FileHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>File</span>
+<a name="line-24"></a><span class='hs-definition'>getFile</span> <span class='hs-layout'>(</span><span class='hs-conid'>FH</span> <span class='hs-varid'>f</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>f</span>
 <a name="line-25"></a>
-<a name="line-26"></a><a name="instance%20Module%20FileHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>Module</span> <span class='hs-conid'>FileHandle</span> <span class='hs-keyword'>where</span>
-<a name="line-27"></a>  <span class='hs-varid'>getText</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>readLine</span> <span class='hs-varop'>.</span> <span class='hs-varid'>getFile</span>
+<a name="line-26"></a><a name="getFileHandle"></a><span class='hs-comment'>-- |Get the file handle</span>
+<a name="line-27"></a><span class='hs-definition'>getFileHandle</span>
+<a name="line-28"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^Path to the file</span>
+<a name="line-29"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>FileHandle</span>
+<a name="line-30"></a><span class='hs-definition'>getFileHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>FH</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fopen</span>
+<a name="line-31"></a>
+<a name="line-32"></a><a name="instance%20PollModule%20FileHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>FileHandle</span> <span class='hs-keyword'>where</span>
+<a name="line-33"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-34"></a>    <span class='hs-varid'>line</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>readLine</span> <span class='hs-varop'>.</span> <span class='hs-varid'>getFile</span> <span class='hs-varop'>$</span> <span class='hs-varid'>h</span>
+<a name="line-35"></a>    <span class='hs-varid'>return</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>$</span> <span class='hs-conid'>T</span><span class='hs-varop'>.</span><span class='hs-varid'>decodeUtf8</span> <span class='hs-varid'>line</span><span class='hs-keyglyph'>]</span>
+<a name="line-36"></a>
+<a name="line-37"></a><span class='hs-comment'>-- TODO EvtModule with inotify?</span>
 </pre></body>
 </html>

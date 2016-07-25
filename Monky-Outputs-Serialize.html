@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Monky.Outputs.Serialize</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_Monky-Outputs-Serialize.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="src/Monky-Outputs-Serialize.html">Source</a></li><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">monky-2.0.0.0: A system state collecting library and application</p></div><div id="content"><div id="module-header"><table class="info"><tr><th>Portability</th><td>Linux</td></tr><tr><th>Stability</th><td>testing</td></tr><tr><th>Maintainer</th><td>ongy</td></tr><tr><th>Safe Haskell</th><td>None</td></tr></table><p class="caption">Monky.Outputs.Serialize</p></div><div id="description"><p class="caption">Description</p><div class="doc"><p>This output can be used to transport monky-output over the network.
+</p><p>A simple receiver looks like:
+</p><pre>
+
+import Monky.Modules
+import Monky.Outputs.Dzen2
+
+import qualified Data.ByteString.Lazy as BS
+import Data.Serialize.Get
+import Data.Serialize
+
+printLine out bs = do
+  let (Right (line, xs)) = runGetLazyState get bs
+  doLine out line
+  printLine out xs
+
+main :: IO ()
+main = do
+  out &lt;- getDzenOut 20 <a href="/home/ongy/-monky/xbm.html">/home/ongy/.monky/xbm</a>
+  input &lt;- BS.getContents
+  printLine out input
+</pre><p>Used with:
+</p><pre>
+socat - TCP4:127.0.0.1:1234 | ./TestS| dzen2 -y 20 -w 1280
+socat TCP-LISTEN:1234 <a href="EXEC:monky -d /tmp/monky.html">EXEC:monky -d /tmp/monky</a>
+</pre></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><a href="#v:getSerializeOut">getSerializeOut</a> :: IO <a href="Monky-Outputs-Serialize.html#t:SerializeOutput">SerializeOutput</a></li><li class="src short"><span class="keyword">data</span>  <a href="#t:SerializeOutput">SerializeOutput</a>  = <a href="#v:SerializeOutput">SerializeOutput</a></li></ul></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><a name="v:getSerializeOut" class="def">getSerializeOut</a> :: IO <a href="Monky-Outputs-Serialize.html#t:SerializeOutput">SerializeOutput</a><a href="src/Monky-Outputs-Serialize.html#getSerializeOut" class="link">Source</a></p><div class="doc"><p>Get an output handle for show formatting
+</p></div></div><div class="top"><p class="src"><span class="keyword">data</span>  <a name="t:SerializeOutput" class="def">SerializeOutput</a>  <a href="src/Monky-Outputs-Serialize.html#SerializeOutput" class="link">Source</a></p><div class="doc"><p>The output handle for using show instance
+</p></div><div class="subs constructors"><p class="caption">Constructors</p><table><tr><td class="src"><a name="v:SerializeOutput" class="def">SerializeOutput</a></td><td class="doc empty">&nbsp;</td></tr></table></div><div class="subs instances"><p id="control.i:SerializeOutput" class="caption collapser" onclick="toggleSection('i:SerializeOutput')">Instances</p><div id="section.i:SerializeOutput" class="show"><table><tr><td class="src"><a href="Monky-Modules.html#t:MonkyOutput">MonkyOutput</a> <a href="Monky-Outputs-Serialize.html#t:SerializeOutput">SerializeOutput</a></td><td class="doc empty">&nbsp;</td></tr></table></div></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.13.2</p></div></body></html>
