@@ -7,200 +7,218 @@
 <link type='text/css' rel='stylesheet' href='hscolour.css' />
 </head>
 <body>
-<pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
-<a name="line-2"></a><span class='hs-comment'>{-# LANGUAGE OverloadedStrings #-}</span>
-<a name="line-3"></a><span class='hs-comment'>{-|
-<a name="line-4"></a>Module      : Monky.Examples.CPU
-<a name="line-5"></a>Description : An example module instance for the cpu module
-<a name="line-6"></a>Maintainer  : ongy
-<a name="line-7"></a>Stability   : testing
-<a name="line-8"></a>Portability : Linux
-<a name="line-9"></a>
-<a name="line-10"></a>-}</span>
-<a name="line-11"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Examples</span><span class='hs-varop'>.</span><span class='hs-conid'>CPU</span>
-<a name="line-12"></a>  <span class='hs-layout'>(</span> <span class='hs-varid'>getCPUHandle</span>
-<a name="line-13"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getCPUHandle'</span>
-<a name="line-14"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getNumaHandles</span>
-<a name="line-15"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getNumaHandles'</span>
-<a name="line-16"></a>
-<a name="line-17"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
-<a name="line-18"></a>
-<a name="line-19"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>CPUHandle</span>
-<a name="line-20"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>NumaHandle</span>
-<a name="line-21"></a>
-<a name="line-22"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>FreqHandle</span>
-<a name="line-23"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>TempHandle</span>
-<a name="line-24"></a>
-<a name="line-25"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getFreqHandle</span>
-<a name="line-26"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getFreqNuma</span>
+<pre><a name="line-1"></a><span class='hs-comment'>{-
+<a name="line-2"></a>    Copyright 2015,2016 Markus Ongyerth, Stephan Guenther
+<a name="line-3"></a>
+<a name="line-4"></a>    This file is part of Monky.
+<a name="line-5"></a>
+<a name="line-6"></a>    Monky is free software: you can redistribute it and/or modify
+<a name="line-7"></a>    it under the terms of the GNU Lesser General Public License as published by
+<a name="line-8"></a>    the Free Software Foundation, either version 3 of the License, or
+<a name="line-9"></a>    (at your option) any later version.
+<a name="line-10"></a>
+<a name="line-11"></a>    Monky is distributed in the hope that it will be useful,
+<a name="line-12"></a>    but WITHOUT ANY WARRANTY; without even the implied warranty of
+<a name="line-13"></a>    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+<a name="line-14"></a>    GNU Lesser General Public License for more details.
+<a name="line-15"></a>
+<a name="line-16"></a>    You should have received a copy of the GNU Lesser General Public License
+<a name="line-17"></a>    along with Monky.  If not, see &lt;<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.
+<a name="line-18"></a>-}</span>
+<a name="line-19"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
+<a name="line-20"></a><span class='hs-comment'>{-# LANGUAGE OverloadedStrings #-}</span>
+<a name="line-21"></a><span class='hs-comment'>{-|
+<a name="line-22"></a>Module      : Monky.Examples.CPU
+<a name="line-23"></a>Description : An example module instance for the cpu module
+<a name="line-24"></a>Maintainer  : ongy
+<a name="line-25"></a>Stability   : testing
+<a name="line-26"></a>Portability : Linux
 <a name="line-27"></a>
-<a name="line-28"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTempHandle</span>
-<a name="line-29"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTempHandle'</span>
-<a name="line-30"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTempHandles</span>
-<a name="line-31"></a>
-<a name="line-32"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getRawNumas</span>
-<a name="line-33"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getRawCPU</span>
-<a name="line-34"></a>  <span class='hs-layout'>)</span>
-<a name="line-35"></a><span class='hs-keyword'>where</span>
+<a name="line-28"></a>-}</span>
+<a name="line-29"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Examples</span><span class='hs-varop'>.</span><span class='hs-conid'>CPU</span>
+<a name="line-30"></a>  <span class='hs-layout'>(</span> <span class='hs-varid'>getCPUHandle</span>
+<a name="line-31"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getCPUHandle'</span>
+<a name="line-32"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getNumaHandles</span>
+<a name="line-33"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getNumaHandles'</span>
+<a name="line-34"></a>
+<a name="line-35"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
 <a name="line-36"></a>
-<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromMaybe</span><span class='hs-layout'>)</span>
-<a name="line-38"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Text</span> <span class='hs-layout'>(</span><span class='hs-conid'>Text</span><span class='hs-layout'>)</span>
-<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Formatting</span>
-<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>List</span> <span class='hs-layout'>(</span><span class='hs-varid'>intercalate</span><span class='hs-layout'>)</span>
-<a name="line-41"></a>
-<a name="line-42"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
-<a name="line-43"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>CPU</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>C</span>
-<a name="line-44"></a>
-<a name="line-45"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
-<a name="line-46"></a><span class='hs-cpp'>#else</span>
-<a name="line-47"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Applicative</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;$&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-48"></a><span class='hs-cpp'>#endif</span>
+<a name="line-37"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>CPUHandle</span>
+<a name="line-38"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>NumaHandle</span>
+<a name="line-39"></a>
+<a name="line-40"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>FreqHandle</span>
+<a name="line-41"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>TempHandle</span>
+<a name="line-42"></a>
+<a name="line-43"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getFreqHandle</span>
+<a name="line-44"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getFreqNuma</span>
+<a name="line-45"></a>
+<a name="line-46"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTempHandle</span>
+<a name="line-47"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTempHandle'</span>
+<a name="line-48"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getTempHandles</span>
 <a name="line-49"></a>
-<a name="line-50"></a><span class='hs-comment'>{- SHARED -}</span>
-<a name="line-51"></a>
-<a name="line-52"></a><a name="cpuColor"></a><span class='hs-comment'>{- CPU Module -}</span>
-<a name="line-53"></a><span class='hs-definition'>cpuColor</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span>
-<a name="line-54"></a><span class='hs-definition'>cpuColor</span> <span class='hs-varid'>p</span>
-<a name="line-55"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>15</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#00d700"</span>
-<a name="line-56"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>50</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffff5f"</span>
-<a name="line-57"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>90</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffd700"</span>
-<a name="line-58"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ff0000"</span>
+<a name="line-50"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getRawNumas</span>
+<a name="line-51"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getRawCPU</span>
+<a name="line-52"></a>  <span class='hs-layout'>)</span>
+<a name="line-53"></a><span class='hs-keyword'>where</span>
+<a name="line-54"></a>
+<a name="line-55"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Maybe</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromMaybe</span><span class='hs-layout'>)</span>
+<a name="line-56"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Text</span> <span class='hs-layout'>(</span><span class='hs-conid'>Text</span><span class='hs-layout'>)</span>
+<a name="line-57"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Formatting</span>
+<a name="line-58"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>List</span> <span class='hs-layout'>(</span><span class='hs-varid'>intercalate</span><span class='hs-layout'>)</span>
 <a name="line-59"></a>
-<a name="line-60"></a><a name="printBar"></a><span class='hs-definition'>printBar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>MonkyOut</span>
-<a name="line-61"></a><span class='hs-definition'>printBar</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span>
-<a name="line-62"></a>  <span class='hs-conid'>MonkyColor</span> <span class='hs-layout'>(</span><span class='hs-varid'>cpuColor</span> <span class='hs-varid'>h</span><span class='hs-layout'>,</span> <span class='hs-str'>"#262626"</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>MonkyBar</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span>
-<a name="line-63"></a>
-<a name="line-64"></a><a name="printXbm"></a><span class='hs-definition'>printXbm</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>MonkyOut</span>
-<a name="line-65"></a><span class='hs-definition'>printXbm</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MonkyImage</span> <span class='hs-str'>"cpu"</span> <span class='hs-chr'>' '</span><span class='hs-comment'>--'🖩' Disabled because of compile errors</span>
-<a name="line-66"></a>
-<a name="line-67"></a><a name="printFrequency"></a><span class='hs-definition'>printFrequency</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Float</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>MonkyOut</span>
-<a name="line-68"></a><span class='hs-definition'>printFrequency</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>.</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-varid'>fixed</span> <span class='hs-num'>1</span> <span class='hs-varop'>%</span> <span class='hs-str'>"G"</span><span class='hs-layout'>)</span>
+<a name="line-60"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
+<a name="line-61"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>CPU</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>C</span>
+<a name="line-62"></a>
+<a name="line-63"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
+<a name="line-64"></a><span class='hs-cpp'>#else</span>
+<a name="line-65"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Applicative</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;$&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-66"></a><span class='hs-cpp'>#endif</span>
+<a name="line-67"></a>
+<a name="line-68"></a><span class='hs-comment'>{- SHARED -}</span>
 <a name="line-69"></a>
-<a name="line-70"></a><a name="printThemp"></a><span class='hs-definition'>printThemp</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>MonkyOut</span>
-<a name="line-71"></a><span class='hs-definition'>printThemp</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>.</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-str'>" "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>int</span> <span class='hs-varop'>%</span> <span class='hs-str'>"°C"</span><span class='hs-layout'>)</span> 
-<a name="line-72"></a>
-<a name="line-73"></a><a name="getNumaNode"></a><span class='hs-definition'>getNumaNode</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>NumaHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>MonkyOut</span><span class='hs-keyglyph'>]</span>
-<a name="line-74"></a><span class='hs-definition'>getNumaNode</span> <span class='hs-varid'>nh</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>map</span> <span class='hs-varid'>printBar</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getNumaPercent</span> <span class='hs-varid'>nh</span>
-<a name="line-75"></a>
-<a name="line-76"></a><a name="RawCPU"></a><span class='hs-comment'>-- |Handle to get the cpu usage stats</span>
-<a name="line-77"></a><a name="RawCPU"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>RawCPU</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>RawCPU</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>CPUHandle</span>
-<a name="line-78"></a><a name="RawNuma"></a><span class='hs-comment'>-- |Numa aware handle to get cpu usage stats</span>
-<a name="line-79"></a><a name="RawNuma"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>RawNuma</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>RawNuma</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>NumaHandle</span>
-<a name="line-80"></a>
-<a name="line-81"></a><a name="instance%20PollModule%20RawCPU"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>RawCPU</span> <span class='hs-keyword'>where</span>
-<a name="line-82"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>RawCPU</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-83"></a>    <span class='hs-varid'>map</span> <span class='hs-varid'>printBar</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUPercent</span> <span class='hs-varid'>h</span>
+<a name="line-70"></a><a name="cpuColor"></a><span class='hs-comment'>{- CPU Module -}</span>
+<a name="line-71"></a><span class='hs-definition'>cpuColor</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span>
+<a name="line-72"></a><span class='hs-definition'>cpuColor</span> <span class='hs-varid'>p</span>
+<a name="line-73"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>15</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#00d700"</span>
+<a name="line-74"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>50</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffff5f"</span>
+<a name="line-75"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>90</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffd700"</span>
+<a name="line-76"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ff0000"</span>
+<a name="line-77"></a>
+<a name="line-78"></a><a name="printBar"></a><span class='hs-definition'>printBar</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>MonkyOut</span>
+<a name="line-79"></a><span class='hs-definition'>printBar</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span>
+<a name="line-80"></a>  <span class='hs-conid'>MonkyColor</span> <span class='hs-layout'>(</span><span class='hs-varid'>cpuColor</span> <span class='hs-varid'>h</span><span class='hs-layout'>,</span> <span class='hs-str'>"#262626"</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-conid'>MonkyBar</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span>
+<a name="line-81"></a>
+<a name="line-82"></a><a name="printXbm"></a><span class='hs-definition'>printXbm</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>MonkyOut</span>
+<a name="line-83"></a><span class='hs-definition'>printXbm</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MonkyImage</span> <span class='hs-str'>"cpu"</span> <span class='hs-chr'>' '</span><span class='hs-comment'>--'🖩' Disabled because of compile errors</span>
 <a name="line-84"></a>
-<a name="line-85"></a><a name="instance%20PollModule%20RawNuma"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>RawNuma</span> <span class='hs-keyword'>where</span>
-<a name="line-86"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>RawNuma</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getNumaNode</span> <span class='hs-varid'>h</span>
+<a name="line-85"></a><a name="printFrequency"></a><span class='hs-definition'>printFrequency</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Float</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>MonkyOut</span>
+<a name="line-86"></a><span class='hs-definition'>printFrequency</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>.</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-varid'>fixed</span> <span class='hs-num'>1</span> <span class='hs-varop'>%</span> <span class='hs-str'>"G"</span><span class='hs-layout'>)</span>
 <a name="line-87"></a>
-<a name="line-88"></a><a name="FreqHandle"></a><span class='hs-comment'>-- |Handle to access cpu frequency information</span>
-<a name="line-89"></a><a name="FreqHandle"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>FreqHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>FH</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>FreqHandle</span>
-<a name="line-90"></a><a name="TempHandle"></a><span class='hs-comment'>-- |Handle to acces thermal zone information</span>
-<a name="line-91"></a><a name="TempHandle"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>TempHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>TH</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>TempHandle</span>
-<a name="line-92"></a>
-<a name="line-93"></a><a name="instance%20PollModule%20FreqHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>FreqHandle</span> <span class='hs-keyword'>where</span>
-<a name="line-94"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>FH</span> <span class='hs-varid'>fh</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-95"></a>    <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-varid'>printFrequency</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUMaxScalingFreq</span> <span class='hs-varid'>fh</span>
-<a name="line-96"></a>
-<a name="line-97"></a><a name="instance%20PollModule%20TempHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>TempHandle</span> <span class='hs-keyword'>where</span>
-<a name="line-98"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>TH</span> <span class='hs-varid'>th</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-99"></a>    <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-varid'>printThemp</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUTemp</span> <span class='hs-varid'>th</span>
-<a name="line-100"></a>
-<a name="line-101"></a><a name="CPUHandle"></a><span class='hs-comment'>{- NORMAL -}</span>
-<a name="line-102"></a><a name="CPUHandle"></a><span class='hs-comment'>-- |The handle type for the default setup</span>
-<a name="line-103"></a><a name="CPUHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>CPUHandle</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>CPH</span> <span class='hs-conid'>FreqHandle</span> <span class='hs-conid'>RawCPU</span> <span class='hs-conid'>TempHandle</span>
-<a name="line-104"></a><a name="NumaHandle"></a><span class='hs-comment'>-- |The handle type for the default setup (numa aware)</span>
-<a name="line-105"></a><a name="NumaHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>NumaHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>NUH</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>FreqHandle</span><span class='hs-layout'>,</span> <span class='hs-conid'>RawNuma</span><span class='hs-layout'>,</span> <span class='hs-conid'>TempHandle</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
-<a name="line-106"></a>
-<a name="line-107"></a><a name="getFreqHandle"></a><span class='hs-comment'>-- |Get a handle to access max node frequency</span>
-<a name="line-108"></a><span class='hs-definition'>getFreqHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>FreqHandle</span>
-<a name="line-109"></a><span class='hs-definition'>getFreqHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>FH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getFreqHandle</span>
+<a name="line-88"></a><a name="printThemp"></a><span class='hs-definition'>printThemp</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>MonkyOut</span>
+<a name="line-89"></a><span class='hs-definition'>printThemp</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>.</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-str'>" "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>int</span> <span class='hs-varop'>%</span> <span class='hs-str'>"°C"</span><span class='hs-layout'>)</span>
+<a name="line-90"></a>
+<a name="line-91"></a><a name="getNumaNode"></a><span class='hs-definition'>getNumaNode</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>NumaHandle</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>MonkyOut</span><span class='hs-keyglyph'>]</span>
+<a name="line-92"></a><span class='hs-definition'>getNumaNode</span> <span class='hs-varid'>nh</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>map</span> <span class='hs-varid'>printBar</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getNumaPercent</span> <span class='hs-varid'>nh</span>
+<a name="line-93"></a>
+<a name="line-94"></a><a name="RawCPU"></a><span class='hs-comment'>-- |Handle to get the cpu usage stats</span>
+<a name="line-95"></a><a name="RawCPU"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>RawCPU</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>RawCPU</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>CPUHandle</span>
+<a name="line-96"></a><a name="RawNuma"></a><span class='hs-comment'>-- |Numa aware handle to get cpu usage stats</span>
+<a name="line-97"></a><a name="RawNuma"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>RawNuma</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>RawNuma</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>NumaHandle</span>
+<a name="line-98"></a>
+<a name="line-99"></a><a name="instance%20PollModule%20RawCPU"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>RawCPU</span> <span class='hs-keyword'>where</span>
+<a name="line-100"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>RawCPU</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-101"></a>    <span class='hs-varid'>map</span> <span class='hs-varid'>printBar</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUPercent</span> <span class='hs-varid'>h</span>
+<a name="line-102"></a>
+<a name="line-103"></a><a name="instance%20PollModule%20RawNuma"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>RawNuma</span> <span class='hs-keyword'>where</span>
+<a name="line-104"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>RawNuma</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getNumaNode</span> <span class='hs-varid'>h</span>
+<a name="line-105"></a>
+<a name="line-106"></a><a name="FreqHandle"></a><span class='hs-comment'>-- |Handle to access cpu frequency information</span>
+<a name="line-107"></a><a name="FreqHandle"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>FreqHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>FH</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>FreqHandle</span>
+<a name="line-108"></a><a name="TempHandle"></a><span class='hs-comment'>-- |Handle to acces thermal zone information</span>
+<a name="line-109"></a><a name="TempHandle"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>TempHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>TH</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>TempHandle</span>
 <a name="line-110"></a>
-<a name="line-111"></a><a name="getFreqNuma"></a><span class='hs-comment'>-- |Numa away version of 'getFreqHandle'</span>
-<a name="line-112"></a><span class='hs-definition'>getFreqNuma</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>RawNuma</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>FreqHandle</span>
-<a name="line-113"></a><span class='hs-definition'>getFreqNuma</span> <span class='hs-varid'>t</span> <span class='hs-layout'>(</span><span class='hs-conid'>RawNuma</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>FH</span> <span class='hs-varop'>&lt;$&gt;</span>  <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getFreqNuma</span> <span class='hs-varid'>t</span> <span class='hs-varid'>h</span>
+<a name="line-111"></a><a name="instance%20PollModule%20FreqHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>FreqHandle</span> <span class='hs-keyword'>where</span>
+<a name="line-112"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>FH</span> <span class='hs-varid'>fh</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-113"></a>    <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-varid'>printFrequency</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUMaxScalingFreq</span> <span class='hs-varid'>fh</span>
 <a name="line-114"></a>
-<a name="line-115"></a><a name="getTempHandle'"></a><span class='hs-comment'>-- |Get the 'TempHandle' for the system (tries to guess CPU zone)</span>
-<a name="line-116"></a><span class='hs-definition'>getTempHandle'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>TempHandle</span>
-<a name="line-117"></a><span class='hs-definition'>getTempHandle'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getTempHandle</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fromMaybe</span> <span class='hs-layout'>(</span><span class='hs-varid'>error</span> <span class='hs-str'>"Could not find thermal zone"</span><span class='hs-layout'>)</span> <span class='hs-varop'>=&lt;&lt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>guessThermalZone</span>
+<a name="line-115"></a><a name="instance%20PollModule%20TempHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>TempHandle</span> <span class='hs-keyword'>where</span>
+<a name="line-116"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>TH</span> <span class='hs-varid'>th</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-117"></a>    <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-varid'>printThemp</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUTemp</span> <span class='hs-varid'>th</span>
 <a name="line-118"></a>
-<a name="line-119"></a><a name="getTempHandles"></a><span class='hs-comment'>-- |Get a 'TempHandle' for each cpu termal zone on the system. will be infinite list, with invalidated zones for convinience</span>
-<a name="line-120"></a><span class='hs-definition'>getTempHandles</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>TempHandle</span><span class='hs-keyglyph'>]</span>
-<a name="line-121"></a><span class='hs-definition'>getTempHandles</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-conid'>TH</span> <span class='hs-layout'>)</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getThermalZones</span>
-<a name="line-122"></a>
-<a name="line-123"></a><a name="getTempHandle"></a><span class='hs-comment'>-- |Get a 'TempHandle' for the specified thermal zone</span>
-<a name="line-124"></a><span class='hs-definition'>getTempHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>TempHandle</span>
-<a name="line-125"></a><span class='hs-definition'>getTempHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>TH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getThermalZone</span>
-<a name="line-126"></a>
-<a name="line-127"></a><a name="getRawCPU"></a><span class='hs-comment'>-- |Get a raw CPU handle</span>
-<a name="line-128"></a><span class='hs-definition'>getRawCPU</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>RawCPU</span>
-<a name="line-129"></a><span class='hs-definition'>getRawCPU</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>RawCPU</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUHandle</span>
-<a name="line-130"></a>
-<a name="line-131"></a><a name="getRawNumas"></a><span class='hs-comment'>-- |Get raw numa aware cpu handles</span>
-<a name="line-132"></a><span class='hs-definition'>getRawNumas</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>RawNuma</span><span class='hs-keyglyph'>]</span>
-<a name="line-133"></a><span class='hs-definition'>getRawNumas</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>map</span> <span class='hs-conid'>RawNuma</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getNumaHandles</span>
-<a name="line-134"></a>
-<a name="line-135"></a><a name="getCPUHandle"></a><span class='hs-comment'>{- |Get a 'CPUHandle'
+<a name="line-119"></a><a name="CPUHandle"></a><span class='hs-comment'>{- NORMAL -}</span>
+<a name="line-120"></a><a name="CPUHandle"></a><span class='hs-comment'>-- |The handle type for the default setup</span>
+<a name="line-121"></a><a name="CPUHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>CPUHandle</span>  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>CPH</span> <span class='hs-conid'>FreqHandle</span> <span class='hs-conid'>RawCPU</span> <span class='hs-conid'>TempHandle</span>
+<a name="line-122"></a><a name="NumaHandle"></a><span class='hs-comment'>-- |The handle type for the default setup (numa aware)</span>
+<a name="line-123"></a><a name="NumaHandle"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>NumaHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>NUH</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>FreqHandle</span><span class='hs-layout'>,</span> <span class='hs-conid'>RawNuma</span><span class='hs-layout'>,</span> <span class='hs-conid'>TempHandle</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span>
+<a name="line-124"></a>
+<a name="line-125"></a><a name="getFreqHandle"></a><span class='hs-comment'>-- |Get a handle to access max node frequency</span>
+<a name="line-126"></a><span class='hs-definition'>getFreqHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>FreqHandle</span>
+<a name="line-127"></a><span class='hs-definition'>getFreqHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>FH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getFreqHandle</span>
+<a name="line-128"></a>
+<a name="line-129"></a><a name="getFreqNuma"></a><span class='hs-comment'>-- |Numa away version of 'getFreqHandle'</span>
+<a name="line-130"></a><span class='hs-definition'>getFreqNuma</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>RawNuma</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>FreqHandle</span>
+<a name="line-131"></a><span class='hs-definition'>getFreqNuma</span> <span class='hs-varid'>t</span> <span class='hs-layout'>(</span><span class='hs-conid'>RawNuma</span> <span class='hs-varid'>h</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>FH</span> <span class='hs-varop'>&lt;$&gt;</span>  <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getFreqNuma</span> <span class='hs-varid'>t</span> <span class='hs-varid'>h</span>
+<a name="line-132"></a>
+<a name="line-133"></a><a name="getTempHandle'"></a><span class='hs-comment'>-- |Get the 'TempHandle' for the system (tries to guess CPU zone)</span>
+<a name="line-134"></a><span class='hs-definition'>getTempHandle'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>TempHandle</span>
+<a name="line-135"></a><span class='hs-definition'>getTempHandle'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getTempHandle</span> <span class='hs-varop'>.</span> <span class='hs-varid'>fromMaybe</span> <span class='hs-layout'>(</span><span class='hs-varid'>error</span> <span class='hs-str'>"Could not find thermal zone"</span><span class='hs-layout'>)</span> <span class='hs-varop'>=&lt;&lt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>guessThermalZone</span>
 <a name="line-136"></a>
-<a name="line-137"></a>This is a shiny combination of the raw handles exported by this module
-<a name="line-138"></a>-}</span>
-<a name="line-139"></a><span class='hs-definition'>getCPUHandle</span>
-<a name="line-140"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-comment'>-- ^The type of scaling frequency that should be reported</span>
-<a name="line-141"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The thermal zone of the cpu</span>
-<a name="line-142"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>CPUHandle</span>
-<a name="line-143"></a><span class='hs-definition'>getCPUHandle</span> <span class='hs-varid'>s</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-144"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getFreqHandle</span> <span class='hs-varid'>s</span>
-<a name="line-145"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span>  <span class='hs-varid'>getRawCPU</span>
-<a name="line-146"></a>  <span class='hs-varid'>th</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTempHandle</span> <span class='hs-varid'>t</span>
-<a name="line-147"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>CPH</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>th</span>
+<a name="line-137"></a><a name="getTempHandles"></a><span class='hs-comment'>-- |Get a 'TempHandle' for each cpu termal zone on the system. will be infinite list, with invalidated zones for convinience</span>
+<a name="line-138"></a><span class='hs-definition'>getTempHandles</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>TempHandle</span><span class='hs-keyglyph'>]</span>
+<a name="line-139"></a><span class='hs-definition'>getTempHandles</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-conid'>TH</span> <span class='hs-layout'>)</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getThermalZones</span>
+<a name="line-140"></a>
+<a name="line-141"></a><a name="getTempHandle"></a><span class='hs-comment'>-- |Get a 'TempHandle' for the specified thermal zone</span>
+<a name="line-142"></a><span class='hs-definition'>getTempHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>TempHandle</span>
+<a name="line-143"></a><span class='hs-definition'>getTempHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>TH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getThermalZone</span>
+<a name="line-144"></a>
+<a name="line-145"></a><a name="getRawCPU"></a><span class='hs-comment'>-- |Get a raw CPU handle</span>
+<a name="line-146"></a><span class='hs-definition'>getRawCPU</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>RawCPU</span>
+<a name="line-147"></a><span class='hs-definition'>getRawCPU</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>RawCPU</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getCPUHandle</span>
 <a name="line-148"></a>
-<a name="line-149"></a><a name="getCPUHandle'"></a><span class='hs-comment'>-- |Same as 'getCPUHandle' but tries to guess the thermal zone</span>
-<a name="line-150"></a><span class='hs-definition'>getCPUHandle'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>CPUHandle</span>
-<a name="line-151"></a><span class='hs-definition'>getCPUHandle'</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-152"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getFreqHandle</span> <span class='hs-varid'>s</span>
-<a name="line-153"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span>  <span class='hs-varid'>getRawCPU</span>
-<a name="line-154"></a>  <span class='hs-varid'>th</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTempHandle'</span>
-<a name="line-155"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>CPH</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>th</span>
-<a name="line-156"></a>
-<a name="line-157"></a><a name="getNumaHandles"></a><span class='hs-comment'>-- |Numa aware version of 'getCPUHandle'</span>
-<a name="line-158"></a><span class='hs-definition'>getNumaHandles</span>
-<a name="line-159"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-comment'>-- ^The type of scaling frequency that should be reported</span>
-<a name="line-160"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>String</span><span class='hs-keyglyph'>]</span> <span class='hs-comment'>-- ^A list of thermal zones for our numa handles</span>
-<a name="line-161"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>NumaHandle</span>
-<a name="line-162"></a><span class='hs-definition'>getNumaHandles</span> <span class='hs-varid'>st</span> <span class='hs-varid'>zones</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-163"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getRawNumas</span>
-<a name="line-164"></a>  <span class='hs-varid'>th</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>mapM</span> <span class='hs-varid'>getTempHandle</span> <span class='hs-varid'>zones</span>
-<a name="line-165"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>mapM</span> <span class='hs-layout'>(</span><span class='hs-varid'>getFreqNuma</span> <span class='hs-varid'>st</span><span class='hs-layout'>)</span> <span class='hs-varid'>raw</span>
-<a name="line-166"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-conid'>NUH</span> <span class='hs-varop'>$</span> <span class='hs-varid'>zip3</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>th</span>
-<a name="line-167"></a>
-<a name="line-168"></a><a name="getNumaHandles'"></a><span class='hs-comment'>-- |Same as 'getNumaHandles' but tries to guess the thermal zone</span>
-<a name="line-169"></a><span class='hs-definition'>getNumaHandles'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>NumaHandle</span>
-<a name="line-170"></a><span class='hs-definition'>getNumaHandles'</span> <span class='hs-varid'>st</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-171"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getRawNumas</span>
-<a name="line-172"></a>  <span class='hs-varid'>zones</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTempHandles</span>
-<a name="line-173"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>mapM</span> <span class='hs-layout'>(</span><span class='hs-varid'>getFreqNuma</span> <span class='hs-varid'>st</span><span class='hs-layout'>)</span> <span class='hs-varid'>raw</span>
-<a name="line-174"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-conid'>NUH</span> <span class='hs-varop'>$</span> <span class='hs-varid'>zip3</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>zones</span>
-<a name="line-175"></a>
-<a name="line-176"></a>
-<a name="line-177"></a>
-<a name="line-178"></a>
-<a name="line-179"></a><a name="formatNumaNode"></a><span class='hs-definition'>formatNumaNode</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>FreqHandle</span><span class='hs-layout'>,</span> <span class='hs-conid'>RawNuma</span><span class='hs-layout'>,</span> <span class='hs-conid'>TempHandle</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>MonkyOut</span><span class='hs-keyglyph'>]</span>
-<a name="line-180"></a><span class='hs-definition'>formatNumaNode</span> <span class='hs-layout'>(</span><span class='hs-varid'>fh</span><span class='hs-layout'>,</span> <span class='hs-varid'>rh</span><span class='hs-layout'>,</span> <span class='hs-varid'>th</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-181"></a>  <span class='hs-varid'>freq</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>fh</span>
-<a name="line-182"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>rh</span>
-<a name="line-183"></a>  <span class='hs-varid'>temp</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>th</span>
-<a name="line-184"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>freq</span> <span class='hs-varop'>++</span> <span class='hs-varid'>raw</span> <span class='hs-varop'>++</span> <span class='hs-varid'>temp</span><span class='hs-layout'>)</span>
+<a name="line-149"></a><a name="getRawNumas"></a><span class='hs-comment'>-- |Get raw numa aware cpu handles</span>
+<a name="line-150"></a><span class='hs-definition'>getRawNumas</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>RawNuma</span><span class='hs-keyglyph'>]</span>
+<a name="line-151"></a><span class='hs-definition'>getRawNumas</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>map</span> <span class='hs-conid'>RawNuma</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-varid'>getNumaHandles</span>
+<a name="line-152"></a>
+<a name="line-153"></a><a name="getCPUHandle"></a><span class='hs-comment'>{- |Get a 'CPUHandle'
+<a name="line-154"></a>
+<a name="line-155"></a>This is a shiny combination of the raw handles exported by this module
+<a name="line-156"></a>-}</span>
+<a name="line-157"></a><span class='hs-definition'>getCPUHandle</span>
+<a name="line-158"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-comment'>-- ^The type of scaling frequency that should be reported</span>
+<a name="line-159"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The thermal zone of the cpu</span>
+<a name="line-160"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>CPUHandle</span>
+<a name="line-161"></a><span class='hs-definition'>getCPUHandle</span> <span class='hs-varid'>s</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-162"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getFreqHandle</span> <span class='hs-varid'>s</span>
+<a name="line-163"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span>  <span class='hs-varid'>getRawCPU</span>
+<a name="line-164"></a>  <span class='hs-varid'>th</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTempHandle</span> <span class='hs-varid'>t</span>
+<a name="line-165"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>CPH</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>th</span>
+<a name="line-166"></a>
+<a name="line-167"></a><a name="getCPUHandle'"></a><span class='hs-comment'>-- |Same as 'getCPUHandle' but tries to guess the thermal zone</span>
+<a name="line-168"></a><span class='hs-definition'>getCPUHandle'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>CPUHandle</span>
+<a name="line-169"></a><span class='hs-definition'>getCPUHandle'</span> <span class='hs-varid'>s</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-170"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getFreqHandle</span> <span class='hs-varid'>s</span>
+<a name="line-171"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span>  <span class='hs-varid'>getRawCPU</span>
+<a name="line-172"></a>  <span class='hs-varid'>th</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTempHandle'</span>
+<a name="line-173"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>$</span> <span class='hs-conid'>CPH</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>th</span>
+<a name="line-174"></a>
+<a name="line-175"></a><a name="getNumaHandles"></a><span class='hs-comment'>-- |Numa aware version of 'getCPUHandle'</span>
+<a name="line-176"></a><span class='hs-definition'>getNumaHandles</span>
+<a name="line-177"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-comment'>-- ^The type of scaling frequency that should be reported</span>
+<a name="line-178"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>String</span><span class='hs-keyglyph'>]</span> <span class='hs-comment'>-- ^A list of thermal zones for our numa handles</span>
+<a name="line-179"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>NumaHandle</span>
+<a name="line-180"></a><span class='hs-definition'>getNumaHandles</span> <span class='hs-varid'>st</span> <span class='hs-varid'>zones</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-181"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getRawNumas</span>
+<a name="line-182"></a>  <span class='hs-varid'>th</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>mapM</span> <span class='hs-varid'>getTempHandle</span> <span class='hs-varid'>zones</span>
+<a name="line-183"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>mapM</span> <span class='hs-layout'>(</span><span class='hs-varid'>getFreqNuma</span> <span class='hs-varid'>st</span><span class='hs-layout'>)</span> <span class='hs-varid'>raw</span>
+<a name="line-184"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-conid'>NUH</span> <span class='hs-varop'>$</span> <span class='hs-varid'>zip3</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>th</span>
 <a name="line-185"></a>
-<a name="line-186"></a><a name="instance%20PollModule%20CPUHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>CPUHandle</span> <span class='hs-keyword'>where</span>
-<a name="line-187"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>CPH</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>rh</span> <span class='hs-varid'>th</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-188"></a>    <span class='hs-varid'>cp</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>rh</span>
-<a name="line-189"></a>    <span class='hs-varid'>ct</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>th</span>
-<a name="line-190"></a>    <span class='hs-varid'>cf</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>fh</span>
-<a name="line-191"></a>    <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>printXbm</span><span class='hs-conop'>:</span> <span class='hs-varid'>cf</span> <span class='hs-varop'>++</span> <span class='hs-varid'>cp</span> <span class='hs-varop'>++</span> <span class='hs-varid'>ct</span><span class='hs-layout'>)</span>
-<a name="line-192"></a>
-<a name="line-193"></a><a name="instance%20PollModule%20NumaHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>NumaHandle</span> <span class='hs-keyword'>where</span>
-<a name="line-194"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>NUH</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
-<a name="line-195"></a>    <span class='hs-layout'>(</span><span class='hs-varid'>printXbm</span><span class='hs-conop'>:</span><span class='hs-layout'>)</span> <span class='hs-varop'>.</span> <span class='hs-varid'>intercalate</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>MonkyPlain</span> <span class='hs-layout'>(</span><span class='hs-str'>" - "</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>mapM</span> <span class='hs-varid'>formatNumaNode</span> <span class='hs-varid'>xs</span>
+<a name="line-186"></a><a name="getNumaHandles'"></a><span class='hs-comment'>-- |Same as 'getNumaHandles' but tries to guess the thermal zone</span>
+<a name="line-187"></a><span class='hs-definition'>getNumaHandles'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>C</span><span class='hs-varop'>.</span><span class='hs-conid'>ScalingType</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>NumaHandle</span>
+<a name="line-188"></a><span class='hs-definition'>getNumaHandles'</span> <span class='hs-varid'>st</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-189"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getRawNumas</span>
+<a name="line-190"></a>  <span class='hs-varid'>zones</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTempHandles</span>
+<a name="line-191"></a>  <span class='hs-varid'>fh</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>mapM</span> <span class='hs-layout'>(</span><span class='hs-varid'>getFreqNuma</span> <span class='hs-varid'>st</span><span class='hs-layout'>)</span> <span class='hs-varid'>raw</span>
+<a name="line-192"></a>  <span class='hs-varid'>return</span> <span class='hs-varop'>.</span> <span class='hs-conid'>NUH</span> <span class='hs-varop'>$</span> <span class='hs-varid'>zip3</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>raw</span> <span class='hs-varid'>zones</span>
+<a name="line-193"></a>
+<a name="line-194"></a>
+<a name="line-195"></a>
+<a name="line-196"></a>
+<a name="line-197"></a><a name="formatNumaNode"></a><span class='hs-definition'>formatNumaNode</span> <span class='hs-keyglyph'>::</span> <span class='hs-layout'>(</span><span class='hs-conid'>FreqHandle</span><span class='hs-layout'>,</span> <span class='hs-conid'>RawNuma</span><span class='hs-layout'>,</span> <span class='hs-conid'>TempHandle</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>MonkyOut</span><span class='hs-keyglyph'>]</span>
+<a name="line-198"></a><span class='hs-definition'>formatNumaNode</span> <span class='hs-layout'>(</span><span class='hs-varid'>fh</span><span class='hs-layout'>,</span> <span class='hs-varid'>rh</span><span class='hs-layout'>,</span> <span class='hs-varid'>th</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-199"></a>  <span class='hs-varid'>freq</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>fh</span>
+<a name="line-200"></a>  <span class='hs-varid'>raw</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>rh</span>
+<a name="line-201"></a>  <span class='hs-varid'>temp</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>th</span>
+<a name="line-202"></a>  <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>freq</span> <span class='hs-varop'>++</span> <span class='hs-varid'>raw</span> <span class='hs-varop'>++</span> <span class='hs-varid'>temp</span><span class='hs-layout'>)</span>
+<a name="line-203"></a>
+<a name="line-204"></a><a name="instance%20PollModule%20CPUHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>CPUHandle</span> <span class='hs-keyword'>where</span>
+<a name="line-205"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>CPH</span> <span class='hs-varid'>fh</span> <span class='hs-varid'>rh</span> <span class='hs-varid'>th</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-206"></a>    <span class='hs-varid'>cp</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>rh</span>
+<a name="line-207"></a>    <span class='hs-varid'>ct</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>th</span>
+<a name="line-208"></a>    <span class='hs-varid'>cf</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getOutput</span> <span class='hs-varid'>fh</span>
+<a name="line-209"></a>    <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>printXbm</span><span class='hs-conop'>:</span> <span class='hs-varid'>cf</span> <span class='hs-varop'>++</span> <span class='hs-varid'>cp</span> <span class='hs-varop'>++</span> <span class='hs-varid'>ct</span><span class='hs-layout'>)</span>
+<a name="line-210"></a>
+<a name="line-211"></a><a name="instance%20PollModule%20NumaHandle"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>NumaHandle</span> <span class='hs-keyword'>where</span>
+<a name="line-212"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>NUH</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span>
+<a name="line-213"></a>    <span class='hs-layout'>(</span><span class='hs-varid'>printXbm</span><span class='hs-conop'>:</span><span class='hs-layout'>)</span> <span class='hs-varop'>.</span> <span class='hs-varid'>intercalate</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>MonkyPlain</span> <span class='hs-layout'>(</span><span class='hs-str'>" - "</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>mapM</span> <span class='hs-varid'>formatNumaNode</span> <span class='hs-varid'>xs</span>
 </pre></body>
 </html>

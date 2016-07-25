@@ -7,60 +7,78 @@
 <link type='text/css' rel='stylesheet' href='hscolour.css' />
 </head>
 <body>
-<pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE ExistentialQuantification #-}</span>
-<a name="line-2"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
-<a name="line-3"></a><span class='hs-comment'>{-|
-<a name="line-4"></a>Module      : Monky.Outputs.Fallback
-<a name="line-5"></a>Description : Output module for doing a "best guess"
-<a name="line-6"></a>Maintainer  : ongy
-<a name="line-7"></a>Stability   : testing
-<a name="line-8"></a>Portability : Linux
-<a name="line-9"></a>
-<a name="line-10"></a>-}</span>
-<a name="line-11"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Outputs</span><span class='hs-varop'>.</span><span class='hs-conid'>Fallback</span>
-<a name="line-12"></a>  <span class='hs-layout'>(</span> <span class='hs-conid'>WrapOuts</span>
-<a name="line-13"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getFallbackOut</span>
-<a name="line-14"></a>  <span class='hs-layout'>)</span>
-<a name="line-15"></a><span class='hs-keyword'>where</span>
-<a name="line-16"></a>
-<a name="line-17"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>IO</span>
-<a name="line-18"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>GHC</span><span class='hs-varop'>.</span><span class='hs-conid'>IO</span><span class='hs-varop'>.</span><span class='hs-conid'>Encoding</span>
-<a name="line-19"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
-<a name="line-20"></a>
-<a name="line-21"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Outputs</span><span class='hs-varop'>.</span><span class='hs-conid'>Ascii</span>
-<a name="line-22"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Outputs</span><span class='hs-varop'>.</span><span class='hs-conid'>Utf8</span>
-<a name="line-23"></a>
-<a name="line-24"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
-<a name="line-25"></a><span class='hs-cpp'>#else</span>
-<a name="line-26"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Applicative</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;$&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-27"></a><span class='hs-cpp'>#endif</span>
-<a name="line-28"></a>
-<a name="line-29"></a><a name="WrapOuts"></a><span class='hs-comment'>-- |The datatype for wrapping outher outputs</span>
-<a name="line-30"></a><a name="WrapOuts"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>WrapOuts</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varop'>.</span> <span class='hs-conid'>MonkyOutput</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>WO</span> <span class='hs-varid'>a</span>
-<a name="line-31"></a>
-<a name="line-32"></a><a name="instance%20MonkyOutput%20WrapOuts"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>MonkyOutput</span> <span class='hs-conid'>WrapOuts</span> <span class='hs-keyword'>where</span>
-<a name="line-33"></a>  <span class='hs-varid'>doLine</span> <span class='hs-layout'>(</span><span class='hs-conid'>WO</span> <span class='hs-varid'>o</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>doLine</span> <span class='hs-varid'>o</span>
+<pre><a name="line-1"></a><span class='hs-comment'>{-
+<a name="line-2"></a>    Copyright 2016 Markus Ongyerth
+<a name="line-3"></a>
+<a name="line-4"></a>    This file is part of Monky.
+<a name="line-5"></a>
+<a name="line-6"></a>    Monky is free software: you can redistribute it and/or modify
+<a name="line-7"></a>    it under the terms of the GNU Lesser General Public License as published by
+<a name="line-8"></a>    the Free Software Foundation, either version 3 of the License, or
+<a name="line-9"></a>    (at your option) any later version.
+<a name="line-10"></a>
+<a name="line-11"></a>    Monky is distributed in the hope that it will be useful,
+<a name="line-12"></a>    but WITHOUT ANY WARRANTY; without even the implied warranty of
+<a name="line-13"></a>    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+<a name="line-14"></a>    GNU Lesser General Public License for more details.
+<a name="line-15"></a>
+<a name="line-16"></a>    You should have received a copy of the GNU Lesser General Public License
+<a name="line-17"></a>    along with Monky.  If not, see &lt;<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.
+<a name="line-18"></a>-}</span>
+<a name="line-19"></a><span class='hs-comment'>{-# LANGUAGE ExistentialQuantification #-}</span>
+<a name="line-20"></a><span class='hs-comment'>{-# LANGUAGE CPP #-}</span>
+<a name="line-21"></a><span class='hs-comment'>{-|
+<a name="line-22"></a>Module      : Monky.Outputs.Fallback
+<a name="line-23"></a>Description : Output module for doing a "best guess"
+<a name="line-24"></a>Maintainer  : ongy
+<a name="line-25"></a>Stability   : testing
+<a name="line-26"></a>Portability : Linux
+<a name="line-27"></a>
+<a name="line-28"></a>-}</span>
+<a name="line-29"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Outputs</span><span class='hs-varop'>.</span><span class='hs-conid'>Fallback</span>
+<a name="line-30"></a>  <span class='hs-layout'>(</span> <span class='hs-conid'>WrapOuts</span>
+<a name="line-31"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getFallbackOut</span>
+<a name="line-32"></a>  <span class='hs-layout'>)</span>
+<a name="line-33"></a><span class='hs-keyword'>where</span>
 <a name="line-34"></a>
-<a name="line-35"></a>
-<a name="line-36"></a><a name="chooseTerminalOut"></a><span class='hs-definition'>chooseTerminalOut</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>WrapOuts</span>
-<a name="line-37"></a><span class='hs-definition'>chooseTerminalOut</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-38"></a>  <span class='hs-varid'>l</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getLocaleEncoding</span>
-<a name="line-39"></a>  <span class='hs-keyword'>if</span> <span class='hs-varid'>textEncodingName</span> <span class='hs-varid'>l</span> <span class='hs-varop'>==</span> <span class='hs-str'>"UTF-8"</span>
-<a name="line-40"></a>    <span class='hs-keyword'>then</span> <span class='hs-conid'>WO</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getUtf8Out</span>
-<a name="line-41"></a>    <span class='hs-keyword'>else</span> <span class='hs-conid'>WO</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getAsciiOut</span>
-<a name="line-42"></a>
-<a name="line-43"></a><a name="getFallbackOut"></a><span class='hs-comment'>{- | Wrapper for normal outputs that tries to find the best output
-<a name="line-44"></a>
-<a name="line-45"></a>This function will check if stdout is a terminal and switch to AsciiOut or UTf8Out depending on the locale
-<a name="line-46"></a>-}</span>
-<a name="line-47"></a><span class='hs-definition'>getFallbackOut</span>
-<a name="line-48"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>MonkyOutput</span> <span class='hs-varid'>a</span>
-<a name="line-49"></a>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The output to use for non-terminal mode</span>
-<a name="line-50"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>WrapOuts</span>
-<a name="line-51"></a><span class='hs-definition'>getFallbackOut</span> <span class='hs-varid'>o</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-52"></a>  <span class='hs-varid'>e</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>hIsTerminalDevice</span> <span class='hs-varid'>stdout</span>
-<a name="line-53"></a>  <span class='hs-keyword'>if</span> <span class='hs-varid'>e</span>
-<a name="line-54"></a>    <span class='hs-keyword'>then</span> <span class='hs-varid'>chooseTerminalOut</span>
-<a name="line-55"></a>    <span class='hs-keyword'>else</span> <span class='hs-conid'>WO</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>o</span>
+<a name="line-35"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>IO</span>
+<a name="line-36"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>GHC</span><span class='hs-varop'>.</span><span class='hs-conid'>IO</span><span class='hs-varop'>.</span><span class='hs-conid'>Encoding</span>
+<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
+<a name="line-38"></a>
+<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Outputs</span><span class='hs-varop'>.</span><span class='hs-conid'>Ascii</span>
+<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Outputs</span><span class='hs-varop'>.</span><span class='hs-conid'>Utf8</span>
+<a name="line-41"></a>
+<a name="line-42"></a><span class='hs-cpp'>#if MIN_VERSION_base(4,8,0)</span>
+<a name="line-43"></a><span class='hs-cpp'>#else</span>
+<a name="line-44"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Applicative</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;$&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-45"></a><span class='hs-cpp'>#endif</span>
+<a name="line-46"></a>
+<a name="line-47"></a><a name="WrapOuts"></a><span class='hs-comment'>-- |The datatype for wrapping outher outputs</span>
+<a name="line-48"></a><a name="WrapOuts"></a><span class='hs-keyword'>data</span> <span class='hs-conid'>WrapOuts</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>forall</span> <span class='hs-varid'>a</span> <span class='hs-varop'>.</span> <span class='hs-conid'>MonkyOutput</span> <span class='hs-varid'>a</span> <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>WO</span> <span class='hs-varid'>a</span>
+<a name="line-49"></a>
+<a name="line-50"></a><a name="instance%20MonkyOutput%20WrapOuts"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>MonkyOutput</span> <span class='hs-conid'>WrapOuts</span> <span class='hs-keyword'>where</span>
+<a name="line-51"></a>  <span class='hs-varid'>doLine</span> <span class='hs-layout'>(</span><span class='hs-conid'>WO</span> <span class='hs-varid'>o</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>doLine</span> <span class='hs-varid'>o</span>
+<a name="line-52"></a>
+<a name="line-53"></a>
+<a name="line-54"></a><a name="chooseTerminalOut"></a><span class='hs-definition'>chooseTerminalOut</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>WrapOuts</span>
+<a name="line-55"></a><span class='hs-definition'>chooseTerminalOut</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-56"></a>  <span class='hs-varid'>l</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getLocaleEncoding</span>
+<a name="line-57"></a>  <span class='hs-keyword'>if</span> <span class='hs-varid'>textEncodingName</span> <span class='hs-varid'>l</span> <span class='hs-varop'>==</span> <span class='hs-str'>"UTF-8"</span>
+<a name="line-58"></a>    <span class='hs-keyword'>then</span> <span class='hs-conid'>WO</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getUtf8Out</span>
+<a name="line-59"></a>    <span class='hs-keyword'>else</span> <span class='hs-conid'>WO</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>getAsciiOut</span>
+<a name="line-60"></a>
+<a name="line-61"></a><a name="getFallbackOut"></a><span class='hs-comment'>{- | Wrapper for normal outputs that tries to find the best output
+<a name="line-62"></a>
+<a name="line-63"></a>This function will check if stdout is a terminal and switch to AsciiOut or UTf8Out depending on the locale
+<a name="line-64"></a>-}</span>
+<a name="line-65"></a><span class='hs-definition'>getFallbackOut</span>
+<a name="line-66"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>MonkyOutput</span> <span class='hs-varid'>a</span>
+<a name="line-67"></a>  <span class='hs-keyglyph'>=&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-varid'>a</span> <span class='hs-comment'>-- ^The output to use for non-terminal mode</span>
+<a name="line-68"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>WrapOuts</span>
+<a name="line-69"></a><span class='hs-definition'>getFallbackOut</span> <span class='hs-varid'>o</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-70"></a>  <span class='hs-varid'>e</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>hIsTerminalDevice</span> <span class='hs-varid'>stdout</span>
+<a name="line-71"></a>  <span class='hs-keyword'>if</span> <span class='hs-varid'>e</span>
+<a name="line-72"></a>    <span class='hs-keyword'>then</span> <span class='hs-varid'>chooseTerminalOut</span>
+<a name="line-73"></a>    <span class='hs-keyword'>else</span> <span class='hs-conid'>WO</span> <span class='hs-varop'>&lt;$&gt;</span> <span class='hs-varid'>o</span>
 </pre></body>
 </html>

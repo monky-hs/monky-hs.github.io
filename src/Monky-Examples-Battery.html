@@ -7,73 +7,91 @@
 <link type='text/css' rel='stylesheet' href='hscolour.css' />
 </head>
 <body>
-<pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE OverloadedStrings #-}</span>
-<a name="line-2"></a><span class='hs-comment'>{-|
-<a name="line-3"></a>Module      : Monky.Examples.Battery
-<a name="line-4"></a>Description : An example module instance for the battery module
-<a name="line-5"></a>Maintainer  : ongy, moepi
-<a name="line-6"></a>Stability   : testing
-<a name="line-7"></a>Portability : Linux
-<a name="line-8"></a>
-<a name="line-9"></a>-}</span>
-<a name="line-10"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Examples</span><span class='hs-varop'>.</span><span class='hs-conid'>Battery</span>
-<a name="line-11"></a>  <span class='hs-layout'>(</span> <span class='hs-varid'>getBatteryHandle</span>
-<a name="line-12"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getBatteryHandle'</span>
-<a name="line-13"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>BatteryH</span>
-<a name="line-14"></a>  <span class='hs-layout'>)</span>
-<a name="line-15"></a><span class='hs-keyword'>where</span>
-<a name="line-16"></a>
-<a name="line-17"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Formatting</span>
-<a name="line-18"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Text</span> <span class='hs-layout'>(</span><span class='hs-conid'>Text</span><span class='hs-layout'>)</span>
-<a name="line-19"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Composition</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>.:</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-20"></a>
-<a name="line-21"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
-<a name="line-22"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Battery</span> <span class='hs-varid'>hiding</span> <span class='hs-layout'>(</span><span class='hs-varid'>getBatteryHandle</span><span class='hs-layout'>,</span> <span class='hs-varid'>getBatteryHandle'</span><span class='hs-layout'>)</span>
-<a name="line-23"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Battery</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>B</span> <span class='hs-layout'>(</span><span class='hs-varid'>getBatteryHandle</span><span class='hs-layout'>,</span> <span class='hs-varid'>getBatteryHandle'</span><span class='hs-layout'>)</span>
-<a name="line-24"></a>
-<a name="line-25"></a><a name="batteryColor"></a><span class='hs-comment'>{- Battery Module -}</span>
-<a name="line-26"></a><span class='hs-definition'>batteryColor</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BatteryState</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span>
-<a name="line-27"></a><span class='hs-definition'>batteryColor</span> <span class='hs-conid'>BatLoading</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#5fff5f"</span>
-<a name="line-28"></a><span class='hs-definition'>batteryColor</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>p</span>
-<a name="line-29"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>20</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffff00"</span>
-<a name="line-30"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>15</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffd700"</span>
-<a name="line-31"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>10</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffaf00"</span>
-<a name="line-32"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span>  <span class='hs-num'>5</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ff0000"</span>
-<a name="line-33"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>""</span>
+<pre><a name="line-1"></a><span class='hs-comment'>{-
+<a name="line-2"></a>    Copyright 2015,2016 Markus Ongyerth, Stephan Guenther
+<a name="line-3"></a>
+<a name="line-4"></a>    This file is part of Monky.
+<a name="line-5"></a>
+<a name="line-6"></a>    Monky is free software: you can redistribute it and/or modify
+<a name="line-7"></a>    it under the terms of the GNU Lesser General Public License as published by
+<a name="line-8"></a>    the Free Software Foundation, either version 3 of the License, or
+<a name="line-9"></a>    (at your option) any later version.
+<a name="line-10"></a>
+<a name="line-11"></a>    Monky is distributed in the hope that it will be useful,
+<a name="line-12"></a>    but WITHOUT ANY WARRANTY; without even the implied warranty of
+<a name="line-13"></a>    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+<a name="line-14"></a>    GNU Lesser General Public License for more details.
+<a name="line-15"></a>
+<a name="line-16"></a>    You should have received a copy of the GNU Lesser General Public License
+<a name="line-17"></a>    along with Monky.  If not, see &lt;<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.
+<a name="line-18"></a>-}</span>
+<a name="line-19"></a><span class='hs-comment'>{-# LANGUAGE OverloadedStrings #-}</span>
+<a name="line-20"></a><span class='hs-comment'>{-|
+<a name="line-21"></a>Module      : Monky.Examples.Battery
+<a name="line-22"></a>Description : An example module instance for the battery module
+<a name="line-23"></a>Maintainer  : ongy, moepi
+<a name="line-24"></a>Stability   : testing
+<a name="line-25"></a>Portability : Linux
+<a name="line-26"></a>
+<a name="line-27"></a>-}</span>
+<a name="line-28"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Examples</span><span class='hs-varop'>.</span><span class='hs-conid'>Battery</span>
+<a name="line-29"></a>  <span class='hs-layout'>(</span> <span class='hs-varid'>getBatteryHandle</span>
+<a name="line-30"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>getBatteryHandle'</span>
+<a name="line-31"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>BatteryH</span>
+<a name="line-32"></a>  <span class='hs-layout'>)</span>
+<a name="line-33"></a><span class='hs-keyword'>where</span>
 <a name="line-34"></a>
-<a name="line-35"></a><a name="batterySymbol"></a><span class='hs-definition'>batterySymbol</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BatteryState</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span>
-<a name="line-36"></a><span class='hs-definition'>batterySymbol</span> <span class='hs-conid'>BatLoading</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"ac_01"</span>
-<a name="line-37"></a><span class='hs-definition'>batterySymbol</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>p</span>
-<a name="line-38"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>50</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"bat_low_01"</span>
-<a name="line-39"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>20</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"bat_empty_01"</span>
-<a name="line-40"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"bat_full_01"</span>
-<a name="line-41"></a>
-<a name="line-42"></a><a name="instance%20PollModule%20BatteryH"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>BatteryH</span> <span class='hs-keyword'>where</span>
-<a name="line-43"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>BH</span> <span class='hs-varid'>bh</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-44"></a>    <span class='hs-varid'>p</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentLevel</span> <span class='hs-varid'>bh</span>
-<a name="line-45"></a>    <span class='hs-varid'>s</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTimeLeft</span> <span class='hs-varid'>bh</span>
-<a name="line-46"></a>    <span class='hs-varid'>online</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentStatus</span> <span class='hs-varid'>bh</span>
-<a name="line-47"></a>    <span class='hs-varid'>pow</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getLoading</span> <span class='hs-varid'>bh</span>
-<a name="line-48"></a>    <span class='hs-keyword'>let</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>s</span> <span class='hs-varop'>`div`</span> <span class='hs-num'>3600</span>
-<a name="line-49"></a>        <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>s</span> <span class='hs-varop'>`mod`</span> <span class='hs-num'>3600</span><span class='hs-layout'>)</span> <span class='hs-varop'>`div`</span> <span class='hs-num'>60</span>
-<a name="line-50"></a>    <span class='hs-varid'>return</span> 
-<a name="line-51"></a>      <span class='hs-keyglyph'>[</span> <span class='hs-conid'>MonkyImage</span> <span class='hs-layout'>(</span><span class='hs-varid'>batterySymbol</span> <span class='hs-varid'>online</span> <span class='hs-varid'>p</span><span class='hs-layout'>)</span> <span class='hs-chr'>'🔋'</span>
-<a name="line-52"></a>      <span class='hs-layout'>,</span> <span class='hs-conid'>MonkyColor</span> <span class='hs-layout'>(</span><span class='hs-varid'>batteryColor</span> <span class='hs-varid'>online</span> <span class='hs-varid'>p</span><span class='hs-layout'>,</span> <span class='hs-str'>""</span><span class='hs-layout'>)</span> <span class='hs-varop'>$</span>
-<a name="line-53"></a>        <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>$</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-varid'>fixed</span> <span class='hs-num'>1</span> <span class='hs-varop'>%</span> <span class='hs-str'>"W "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>int</span> <span class='hs-varop'>%</span> <span class='hs-str'>"% "</span> <span class='hs-varop'>%</span> <span class='hs-layout'>(</span><span class='hs-varid'>left</span> <span class='hs-num'>2</span> <span class='hs-chr'>' '</span> <span class='hs-varop'>%.</span> <span class='hs-varid'>int</span><span class='hs-layout'>)</span> <span class='hs-varop'>%</span> <span class='hs-str'>":"</span> <span class='hs-varop'>%</span> <span class='hs-layout'>(</span><span class='hs-varid'>left</span> <span class='hs-num'>2</span> <span class='hs-chr'>'0'</span> <span class='hs-varop'>%.</span> <span class='hs-varid'>int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>pow</span> <span class='hs-varid'>p</span> <span class='hs-varid'>h</span> <span class='hs-varid'>m</span>
-<a name="line-54"></a>      <span class='hs-keyglyph'>]</span>
-<a name="line-55"></a>
-<a name="line-56"></a><a name="BatteryH"></a><span class='hs-comment'>-- |The handle type for this module</span>
-<a name="line-57"></a><a name="BatteryH"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>BatteryH</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>BH</span> <span class='hs-conid'>BatteryHandle</span>
-<a name="line-58"></a>
-<a name="line-59"></a><a name="getBatteryHandle"></a><span class='hs-comment'>-- |Create a 'BatteryHandle'</span>
-<a name="line-60"></a><span class='hs-definition'>getBatteryHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>  <span class='hs-comment'>-- ^The name of the wall socket adapter used by the battery</span>
-<a name="line-61"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The name of the battery</span>
-<a name="line-62"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>BatteryH</span>
-<a name="line-63"></a><span class='hs-definition'>getBatteryHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>BH</span> <span class='hs-varop'>.:</span> <span class='hs-conid'>B</span><span class='hs-varop'>.</span><span class='hs-varid'>getBatteryHandle</span>
-<a name="line-64"></a>
-<a name="line-65"></a>
-<a name="line-66"></a><a name="getBatteryHandle'"></a><span class='hs-comment'>-- |Version of 'getBatteryHandle' that defaults to "BAT0"</span>
-<a name="line-67"></a><span class='hs-definition'>getBatteryHandle'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>BatteryH</span>
-<a name="line-68"></a><span class='hs-definition'>getBatteryHandle'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>BH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>B</span><span class='hs-varop'>.</span><span class='hs-varid'>getBatteryHandle'</span>
+<a name="line-35"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Formatting</span>
+<a name="line-36"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Text</span> <span class='hs-layout'>(</span><span class='hs-conid'>Text</span><span class='hs-layout'>)</span>
+<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Composition</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>.:</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<a name="line-38"></a>
+<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
+<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Battery</span> <span class='hs-varid'>hiding</span> <span class='hs-layout'>(</span><span class='hs-varid'>getBatteryHandle</span><span class='hs-layout'>,</span> <span class='hs-varid'>getBatteryHandle'</span><span class='hs-layout'>)</span>
+<a name="line-41"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Battery</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>B</span> <span class='hs-layout'>(</span><span class='hs-varid'>getBatteryHandle</span><span class='hs-layout'>,</span> <span class='hs-varid'>getBatteryHandle'</span><span class='hs-layout'>)</span>
+<a name="line-42"></a>
+<a name="line-43"></a><a name="batteryColor"></a><span class='hs-comment'>{- Battery Module -}</span>
+<a name="line-44"></a><span class='hs-definition'>batteryColor</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BatteryState</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span>
+<a name="line-45"></a><span class='hs-definition'>batteryColor</span> <span class='hs-conid'>BatLoading</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#5fff5f"</span>
+<a name="line-46"></a><span class='hs-definition'>batteryColor</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>p</span>
+<a name="line-47"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>20</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffff00"</span>
+<a name="line-48"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>15</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffd700"</span>
+<a name="line-49"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>10</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ffaf00"</span>
+<a name="line-50"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span>  <span class='hs-num'>5</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"#ff0000"</span>
+<a name="line-51"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>""</span>
+<a name="line-52"></a>
+<a name="line-53"></a><a name="batterySymbol"></a><span class='hs-definition'>batterySymbol</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>BatteryState</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Int</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span>
+<a name="line-54"></a><span class='hs-definition'>batterySymbol</span> <span class='hs-conid'>BatLoading</span> <span class='hs-keyword'>_</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"ac_01"</span>
+<a name="line-55"></a><span class='hs-definition'>batterySymbol</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>p</span>
+<a name="line-56"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>50</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"bat_low_01"</span>
+<a name="line-57"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>p</span> <span class='hs-varop'>&lt;</span> <span class='hs-num'>20</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"bat_empty_01"</span>
+<a name="line-58"></a>  <span class='hs-keyglyph'>|</span> <span class='hs-varid'>otherwise</span> <span class='hs-keyglyph'>=</span> <span class='hs-str'>"bat_full_01"</span>
+<a name="line-59"></a>
+<a name="line-60"></a><a name="instance%20PollModule%20BatteryH"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>BatteryH</span> <span class='hs-keyword'>where</span>
+<a name="line-61"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>BH</span> <span class='hs-varid'>bh</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-62"></a>    <span class='hs-varid'>p</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentLevel</span> <span class='hs-varid'>bh</span>
+<a name="line-63"></a>    <span class='hs-varid'>s</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getTimeLeft</span> <span class='hs-varid'>bh</span>
+<a name="line-64"></a>    <span class='hs-varid'>online</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getCurrentStatus</span> <span class='hs-varid'>bh</span>
+<a name="line-65"></a>    <span class='hs-varid'>pow</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getLoading</span> <span class='hs-varid'>bh</span>
+<a name="line-66"></a>    <span class='hs-keyword'>let</span> <span class='hs-varid'>h</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>s</span> <span class='hs-varop'>`div`</span> <span class='hs-num'>3600</span>
+<a name="line-67"></a>        <span class='hs-varid'>m</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>s</span> <span class='hs-varop'>`mod`</span> <span class='hs-num'>3600</span><span class='hs-layout'>)</span> <span class='hs-varop'>`div`</span> <span class='hs-num'>60</span>
+<a name="line-68"></a>    <span class='hs-varid'>return</span>
+<a name="line-69"></a>      <span class='hs-keyglyph'>[</span> <span class='hs-conid'>MonkyImage</span> <span class='hs-layout'>(</span><span class='hs-varid'>batterySymbol</span> <span class='hs-varid'>online</span> <span class='hs-varid'>p</span><span class='hs-layout'>)</span> <span class='hs-chr'>'🔋'</span>
+<a name="line-70"></a>      <span class='hs-layout'>,</span> <span class='hs-conid'>MonkyColor</span> <span class='hs-layout'>(</span><span class='hs-varid'>batteryColor</span> <span class='hs-varid'>online</span> <span class='hs-varid'>p</span><span class='hs-layout'>,</span> <span class='hs-str'>""</span><span class='hs-layout'>)</span> <span class='hs-varop'>$</span>
+<a name="line-71"></a>        <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>$</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-varid'>fixed</span> <span class='hs-num'>1</span> <span class='hs-varop'>%</span> <span class='hs-str'>"W "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>int</span> <span class='hs-varop'>%</span> <span class='hs-str'>"% "</span> <span class='hs-varop'>%</span> <span class='hs-layout'>(</span><span class='hs-varid'>left</span> <span class='hs-num'>2</span> <span class='hs-chr'>' '</span> <span class='hs-varop'>%.</span> <span class='hs-varid'>int</span><span class='hs-layout'>)</span> <span class='hs-varop'>%</span> <span class='hs-str'>":"</span> <span class='hs-varop'>%</span> <span class='hs-layout'>(</span><span class='hs-varid'>left</span> <span class='hs-num'>2</span> <span class='hs-chr'>'0'</span> <span class='hs-varop'>%.</span> <span class='hs-varid'>int</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varid'>pow</span> <span class='hs-varid'>p</span> <span class='hs-varid'>h</span> <span class='hs-varid'>m</span>
+<a name="line-72"></a>      <span class='hs-keyglyph'>]</span>
+<a name="line-73"></a>
+<a name="line-74"></a><a name="BatteryH"></a><span class='hs-comment'>-- |The handle type for this module</span>
+<a name="line-75"></a><a name="BatteryH"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>BatteryH</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>BH</span> <span class='hs-conid'>BatteryHandle</span>
+<a name="line-76"></a>
+<a name="line-77"></a><a name="getBatteryHandle"></a><span class='hs-comment'>-- |Create a 'BatteryHandle'</span>
+<a name="line-78"></a><span class='hs-definition'>getBatteryHandle</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span>  <span class='hs-comment'>-- ^The name of the wall socket adapter used by the battery</span>
+<a name="line-79"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The name of the battery</span>
+<a name="line-80"></a>                 <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>BatteryH</span>
+<a name="line-81"></a><span class='hs-definition'>getBatteryHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>BH</span> <span class='hs-varop'>.:</span> <span class='hs-conid'>B</span><span class='hs-varop'>.</span><span class='hs-varid'>getBatteryHandle</span>
+<a name="line-82"></a>
+<a name="line-83"></a>
+<a name="line-84"></a><a name="getBatteryHandle'"></a><span class='hs-comment'>-- |Version of 'getBatteryHandle' that defaults to "BAT0"</span>
+<a name="line-85"></a><span class='hs-definition'>getBatteryHandle'</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>BatteryH</span>
+<a name="line-86"></a><span class='hs-definition'>getBatteryHandle'</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>BH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>B</span><span class='hs-varop'>.</span><span class='hs-varid'>getBatteryHandle'</span>
 </pre></body>
 </html>
