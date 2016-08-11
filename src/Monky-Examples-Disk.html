@@ -43,27 +43,28 @@
 <a name="line-34"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Formatting</span>
 <a name="line-35"></a>
 <a name="line-36"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Examples</span><span class='hs-varop'>.</span><span class='hs-conid'>Utility</span>
-<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
-<a name="line-38"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Disk</span> <span class='hs-varid'>hiding</span> <span class='hs-layout'>(</span><span class='hs-varid'>getDiskHandle</span><span class='hs-layout'>)</span>
-<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Disk</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>D</span> <span class='hs-layout'>(</span><span class='hs-varid'>getDiskHandle</span><span class='hs-layout'>)</span>
-<a name="line-40"></a>
-<a name="line-41"></a><a name="DiskH"></a><span class='hs-comment'>-- |The handle type for this module</span>
-<a name="line-42"></a><a name="DiskH"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>DiskH</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>DH</span> <span class='hs-conid'>DiskHandle</span>
-<a name="line-43"></a>
-<a name="line-44"></a><a name="getDiskHandle"></a><span class='hs-comment'>-- |Get a disk handle</span>
-<a name="line-45"></a><span class='hs-definition'>getDiskHandle</span>
-<a name="line-46"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The UUID of the device to monitor. It has to be mounted at monky startup!</span>
-<a name="line-47"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>DiskH</span>
-<a name="line-48"></a><span class='hs-definition'>getDiskHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>DH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>D</span><span class='hs-varop'>.</span><span class='hs-varid'>getDiskHandle</span>
-<a name="line-49"></a>
-<a name="line-50"></a><a name="instance%20PollModule%20DiskH"></a><span class='hs-comment'>{- Disk module -}</span>
-<a name="line-51"></a><a name="instance%20PollModule%20DiskH"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>DiskH</span> <span class='hs-keyword'>where</span>
-<a name="line-52"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>DH</span> <span class='hs-varid'>dh</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-53"></a>    <span class='hs-layout'>(</span><span class='hs-varid'>dr</span><span class='hs-layout'>,</span> <span class='hs-varid'>dw</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getDiskReadWrite</span> <span class='hs-varid'>dh</span>
-<a name="line-54"></a>    <span class='hs-varid'>df</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getDiskFree</span> <span class='hs-varid'>dh</span>
-<a name="line-55"></a>    <span class='hs-varid'>return</span>
-<a name="line-56"></a>      <span class='hs-keyglyph'>[</span> <span class='hs-conid'>MonkyImage</span> <span class='hs-str'>"diskette"</span> <span class='hs-chr'>' '</span><span class='hs-comment'>-- '🖪' also disabled for compat reasons</span>
-<a name="line-57"></a>      <span class='hs-layout'>,</span> <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>$</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-varid'>stext</span> <span class='hs-varop'>%</span> <span class='hs-str'>" "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>stext</span> <span class='hs-varop'>%</span> <span class='hs-str'>" "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>stext</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>convertUnitSI</span> <span class='hs-varid'>df</span> <span class='hs-str'>"B"</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>convertUnitSI</span> <span class='hs-varid'>dr</span> <span class='hs-str'>"B"</span> <span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>convertUnitSI</span> <span class='hs-varid'>dw</span> <span class='hs-str'>"B"</span><span class='hs-layout'>)</span>
-<a name="line-58"></a>      <span class='hs-keyglyph'>]</span>
+<a name="line-37"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Examples</span><span class='hs-varop'>.</span><span class='hs-conid'>Images</span>
+<a name="line-38"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Modules</span>
+<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Disk</span> <span class='hs-varid'>hiding</span> <span class='hs-layout'>(</span><span class='hs-varid'>getDiskHandle</span><span class='hs-layout'>)</span>
+<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Monky</span><span class='hs-varop'>.</span><span class='hs-conid'>Disk</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>D</span> <span class='hs-layout'>(</span><span class='hs-varid'>getDiskHandle</span><span class='hs-layout'>)</span>
+<a name="line-41"></a>
+<a name="line-42"></a><a name="DiskH"></a><span class='hs-comment'>-- |The handle type for this module</span>
+<a name="line-43"></a><a name="DiskH"></a><span class='hs-keyword'>newtype</span> <span class='hs-conid'>DiskH</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>DH</span> <span class='hs-conid'>DiskHandle</span>
+<a name="line-44"></a>
+<a name="line-45"></a><a name="getDiskHandle"></a><span class='hs-comment'>-- |Get a disk handle</span>
+<a name="line-46"></a><span class='hs-definition'>getDiskHandle</span>
+<a name="line-47"></a>  <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-comment'>-- ^The UUID of the device to monitor. It has to be mounted at monky startup!</span>
+<a name="line-48"></a>  <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>DiskH</span>
+<a name="line-49"></a><span class='hs-definition'>getDiskHandle</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-conid'>DH</span> <span class='hs-varop'>.</span> <span class='hs-conid'>D</span><span class='hs-varop'>.</span><span class='hs-varid'>getDiskHandle</span>
+<a name="line-50"></a>
+<a name="line-51"></a><a name="instance%20PollModule%20DiskH"></a><span class='hs-comment'>{- Disk module -}</span>
+<a name="line-52"></a><a name="instance%20PollModule%20DiskH"></a><span class='hs-keyword'>instance</span> <span class='hs-conid'>PollModule</span> <span class='hs-conid'>DiskH</span> <span class='hs-keyword'>where</span>
+<a name="line-53"></a>  <span class='hs-varid'>getOutput</span> <span class='hs-layout'>(</span><span class='hs-conid'>DH</span> <span class='hs-varid'>dh</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
+<a name="line-54"></a>    <span class='hs-layout'>(</span><span class='hs-varid'>dr</span><span class='hs-layout'>,</span> <span class='hs-varid'>dw</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getDiskReadWrite</span> <span class='hs-varid'>dh</span>
+<a name="line-55"></a>    <span class='hs-varid'>df</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>getDiskFree</span> <span class='hs-varid'>dh</span>
+<a name="line-56"></a>    <span class='hs-varid'>return</span>
+<a name="line-57"></a>      <span class='hs-keyglyph'>[</span> <span class='hs-varid'>diskImage</span>
+<a name="line-58"></a>      <span class='hs-layout'>,</span> <span class='hs-conid'>MonkyPlain</span> <span class='hs-varop'>$</span> <span class='hs-varid'>sformat</span> <span class='hs-layout'>(</span><span class='hs-varid'>stext</span> <span class='hs-varop'>%</span> <span class='hs-str'>" "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>stext</span> <span class='hs-varop'>%</span> <span class='hs-str'>" "</span> <span class='hs-varop'>%</span> <span class='hs-varid'>stext</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>convertUnitSI</span> <span class='hs-varid'>df</span> <span class='hs-str'>"B"</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>convertUnitSI</span> <span class='hs-varid'>dr</span> <span class='hs-str'>"B"</span> <span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>convertUnitSI</span> <span class='hs-varid'>dw</span> <span class='hs-str'>"B"</span><span class='hs-layout'>)</span>
+<a name="line-59"></a>      <span class='hs-keyglyph'>]</span>
 </pre></body>
 </html>
